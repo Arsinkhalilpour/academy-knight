@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>آکادمی شوالیه | کلاس پنجم</title>
+<style>
+:root {
+  --site-primary: #142b52;
+  --site-secondary: #087eae;
+  --site-background: #07111f;
+  --site-on-primary: #ffffff;
+  --site-on-secondary: #ffffff;
+  --site-on-background: #eef5ff;
+  --site-font-body: Tahoma, "Segoe UI", sans-serif;
+  --site-font-heading: Tahoma, "Segoe UI", sans-serif;
+  --site-heading-scale: 1;
+  --site-spacing-scale: 1;
+  --site-radius-scale: 1;
+  --site-decoration-opacity: 1;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: var(--site-font-body); background: var(--site-background); color: var(--site-on-background); }
+#app { min-height: 100vh; width: 100%; border-radius: 0; overflow: hidden; background-color: var(--site-background); position: relative; }
+.sky { position:absolute; inset:0; pointer-events:none; opacity:calc(.55 * var(--site-decoration-opacity)); background: radial-gradient(circle at 12% 18%, #1d77b7 0 1px, transparent 2px), radial-gradient(circle at 75% 10%, #d9f2ff 0 1px, transparent 2px), radial-gradient(circle at 55% 35%, #72caff 0 1px, transparent 2px), radial-gradient(ellipse at 80% 0%, #124d7a 0%, transparent 45%); background-size: 170px 150px, 220px 190px, 260px 230px, auto; }
+header { position:relative; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:calc(18px * var(--site-spacing-scale)) calc(5vw * var(--site-spacing-scale)); background:var(--site-primary); border-bottom:1px solid #2b5278; }
+.brand { display:flex; align-items:center; gap:12px; font-weight:900; letter-spacing:-.5px; }
+.logo { width:46px; height:46px; display:grid; place-items:center; border-radius:15px; background:#07111f; border:1px solid #4c9acb; font-size:25px; }
+.brand small { display:block; color:#b8d8ef; font-weight:500; margin-top:4px; }
+.header-tag { color:#c8eaff; font-size:13px; border:1px solid #4d83aa; padding:8px 12px; border-radius:999px; }
+main { position:relative; max-width:1120px; margin:auto; padding:30px 22px 60px; }
+.hero { display:grid; grid-template-columns:1.3fr .7fr; gap:22px; align-items:stretch; }
+.panel { background:light-dark(#10243a,#10243a); border:1px solid #254969; border-radius:calc(22px * var(--site-radius-scale)); padding:calc(24px * var(--site-spacing-scale)); box-shadow:0 14px 35px #0003; }
+h1,h2,h3 { font-family:var(--site-font-heading); }
+h1 { font-size:calc( clamp(27px,4vw,42px) * var(--site-heading-scale)); line-height:1.45; margin:0 0 12px; }
+h2 { font-size:calc(22px * var(--site-heading-scale)); margin:0 0 14px; }
+p { line-height:2; color:#d2e2f0; }
+.accent { color:#69caff; }
+.primary-btn,.ghost-btn,.tab { border:0; border-radius:12px; padding:12px 17px; font:inherit; cursor:pointer; transition:.2s; }
+.primary-btn { color:white; background:var(--site-secondary); font-weight:800; }
+.primary-btn:hover { filter:brightness(1.15); transform:translateY(-1px); }
+.ghost-btn,.tab { color:#d8efff; background:#172f49; border:1px solid #315878; }
+.tab.active { background:#087eae; border-color:#4ab8ed; color:white; }
+.hero-art { min-height:235px; display:grid; place-items:center; text-align:center; background:linear-gradient(145deg,#102d4c,#07111f); overflow:hidden; position:relative; }
+.bat-symbol { font-size:92px; filter:drop-shadow(0 0 20px #159bd8); }
+.ship { font-size:42px; position:absolute; bottom:22px; left:25px; transform:rotate(-12deg); opacity:.9; }
+.stats { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:20px 0 26px; }
+.stat { background:#0d2034; border:1px solid #234766; border-radius:15px; padding:14px; text-align:center; }
+.stat strong { display:block; font-size:22px; color:#70d1ff; margin-bottom:4px; }
+.grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+.lesson-list { display:grid; gap:9px; }
+.lesson { width:100%; text-align:right; background:#0b1b2c; border:1px solid #24435f; color:#e9f5ff; padding:13px 14px; border-radius:13px; cursor:pointer; font:inherit; }
+.lesson.selected { border-color:#38b9f3; background:#123653; }
+.lesson span { color:#80cfff; font-size:12px; display:block; margin-top:5px; }
+.ai-box { background:linear-gradient(140deg,#102e4a,#0b1b2d); border:1px solid #28618a; }
+.ai-label { color:#7bd5ff; font-weight:bold; font-size:13px; }
+textarea,input { width:100%; padding:13px; background:#071522; color:#eff8ff; border:1px solid #315573; border-radius:12px; font:inherit; margin:8px 0 12px; }
+textarea { min-height:95px; resize:vertical; }
+.answer { min-height:65px; background:#071827; border:1px dashed #39749b; padding:13px; border-radius:12px; white-space:pre-wrap; line-height:1.9; color:#dff3ff; }
+.quiz-area { margin-top:20px; }
+.quiz-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+.question { padding:13px; border-bottom:1px solid #25435d; line-height:2; }
+.question label { display:block; margin:5px 0; color:#d3e5f2; cursor:pointer; }
+.question input { width:auto; margin:0 6px; }
+.result { margin-top:12px; color:#7bd5ff; font-weight:bold; }
+.management { margin-top:20px; }
+.demo-note { padding:12px 14px; border:1px solid #8b7137; background:#332a16; color:#ffe6a6; border-radius:12px; line-height:1.9; margin-bottom:16px; }
+.admin-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.admin-card { background:#0b1b2c; border:1px solid #24435f; border-radius:15px; padding:16px; }
+.admin-card h3 { margin-top:0; color:#8bd8ff; }
+.admin-card button { margin:4px 0; }
+.role-list,.upload-list { display:grid; gap:8px; margin-top:12px; }
+.role-item,.upload-item { padding:10px; border:1px solid #294b68; border-radius:10px; background:#10243a; line-height:1.8; }
+.small-note { color:#a9c3d8; font-size:12px; line-height:1.8; }
+input[type="file"] { padding:9px; }
+footer { position:relative; text-align:center; color:#89a9c1; padding:20px; font-size:12px; border-top:1px solid #1d3a54; }
+@media(max-width:760px){ .hero,.grid,.admin-grid {grid-template-columns:1fr;} .stats {grid-template-columns:1fr 1fr 1fr;} header {align-items:flex-start;} .header-tag {display:none;} }
+</style>
+</head>
+<body>
+<div id="app">
+<div class="sky"></div>
+<header>
+  <div class="brand"><div class="logo">🦇</div><div>آکادمی شوالیه<small>پایگاه یادگیری کلاس پنجم</small></div></div>
+  <div class="header-tag">✦ مأموریت امروز: یادگیری هوشمند</div>
+</header>
+<main>
+  <section class="hero">
+    <div class="panel">
+      <div class="accent">به آکادمی خوش آمدی، قهرمان!</div>
+      <h1>یادگیری، <span class="accent">مأموریت</span> توست.</h1>
+      <p>درس‌ها را کشف کن، از دستیار هوشمند کمک بگیر و با آزمون‌ها امتیاز جمع کن. اینجا هر سؤال، یک سرنخ تازه است.</p>
+      <button class="primary-btn" onclick="document.getElementById('lessons').scrollIntoView({behavior:'smooth'})">شروع مأموریت ←</button>
+      <div class="stats">
+        <div class="stat"><strong>۵</strong><small>پایه تحصیلی</small></div>
+        <div class="stat"><strong>۳</strong><small>بخش آموزشی</small></div>
+        <div class="stat"><strong>∞</strong><small>فرصت یادگیری</small></div>
+      </div>
+    </div>
+    <div class="panel hero-art"><div class="bat-symbol">🦇</div><div class="ship">🚀</div><div>پایگاه فضایی شوالیه‌ها</div></div>
+  </section>
+  <section class="grid" id="lessons">
+    <div class="panel">
+      <h2>📚 انتخاب درس</h2>
+      <div class="lesson-list">
+        <button class="lesson selected" onclick="selectLesson(this,'علوم پنجم · درس ۴','برگی از تاریخ زمین')">علوم پنجم · درس ۴ <span>برگی از تاریخ زمین — فسیل‌ها</span></button>
+        <button class="lesson" onclick="selectLesson(this,'علوم پنجم · درس‌های دیگر','به‌زودی مأموریت‌های تازه اضافه می‌شوند!')">درس‌های دیگر علوم <span>در حال آماده‌سازی</span></button>
+        <button class="lesson" onclick="selectLesson(this,'ریاضی پنجم','تمرین الگوها، کسرها و مسئله‌ها به‌زودی اضافه می‌شود.')">ریاضی پنجم <span>تمرین و حل مسئله</span></button>
+      </div>
+      <div style="margin-top:18px;padding:14px;background:#0a1a2a;border-radius:13px">
+        <div class="accent" id="lessonTitle">علوم پنجم · درس ۴</div>
+        <h3 id="lessonSubtitle">برگی از تاریخ زمین</h3>
+        <p id="lessonDesc">فسیل‌ها نشانه‌هایی از جانداران گذشته‌اند که در سنگ‌ها یا رسوبات حفظ شده‌اند. با بررسی آن‌ها می‌توانیم درباره زندگی در زمان‌های دور اطلاعات به دست آوریم.</p>
+      </div>
+    </div>
+    <div class="panel ai-box">
+      <div class="ai-label">✦ دستیار هوشمند آکادمی</div>
+      <h2>هر سؤالی داری بپرس!</h2>
+      <p>سؤالت را بنویس؛ این نسخهٔ نمایشی می‌تواند برای درس فسیل‌ها چند راهنمای آماده نشان دهد.</p>
+      <textarea id="ask" placeholder="مثلاً فسیل چگونه تشکیل می‌شود؟"></textarea>
+      <button class="primary-btn" onclick="askAI()">دریافت راهنمایی ✨</button>
+      <div class="answer" id="aiAnswer" style="margin-top:13px">منتظر پرسش تو هستم…</div>
+    </div>
+  </section>
+  <section class="panel quiz-area">
+    <h2>🎯 آزمون مأموریت</h2>
+    <div class="quiz-tabs">
+      <button class="tab active" id="shortTab" onclick="showQuiz('short')">آزمون کوتاه</button>
+      <button class="tab" id="longTab" onclick="showQuiz('long')">آزمون ۵ سؤالی</button>
+    </div>
+    <div id="quiz"></div>
+    <button class="primary-btn" onclick="gradeQuiz()">بررسی پاسخ‌ها</button>
+    <div class="result" id="result"></div>
+  </section>
+  <section class="panel management" id="management">
+    <h2>🔐 پنل ورود و مدیریت آکادمی</h2>
+    <div class="demo-note"><strong>نسخهٔ آزمایشی:</strong> این بخش فقط ظاهر و جریان کار را نشان می‌دهد. ورود ایمیلی، تعیین نقش امن و بارگذاری واقعی فایل‌ها تا زمان اتصال به سرور و پایگاه‌داده فعال نیست؛ اطلاعات واقعی یا رمز عبور وارد نکن.</div>
+    <div class="admin-grid">
+      <div class="admin-card">
+        <h3>ورود آزمایشی با ایمیل</h3>
+        <label for="loginEmail">ایمیل آزمایشی</label>
+        <input id="loginEmail" type="email" placeholder="name@example.com" autocomplete="off">
+        <button class="primary-btn" onclick="demoLogin()">ورود نمایشی</button>
+        <p class="small-note" id="loginStatus">مدیر اصلی: حساب مالک سایت (پس از راه‌اندازی واقعی باید ایمیل مالک ثبت شود).</p>
+      </div>
+      <div class="admin-card">
+        <h3>مدیریت اعضا و نقش‌ها</h3>
+        <label for="memberEmail">ایمیل عضو</label>
+        <input id="memberEmail" type="email" placeholder="teacher@example.com" autocomplete="off">
+        <label for="memberRole">نقش موردنظر</label>
+        <select id="memberRole" style="width:100%;padding:12px;background:#071522;color:#eff8ff;border:1px solid #315573;border-radius:12px;font:inherit;margin:8px 0 12px"><option value="teacher">آموزگار</option><option value="admin">مدیر</option></select>
+        <button class="primary-btn" onclick="addDemoMember()">افزودن نقش نمایشی</button>
+        <div class="role-list" id="roleList"><div class="role-item">مدیر اصلی — مالک آکادمی</div></div>
+        <p class="small-note">در نسخهٔ واقعی فقط مدیر اصلی می‌تواند مدیر یا آموزگار تعیین کند؛ آموزگار فقط محتوای آموزشی خودش را بارگذاری می‌کند.</p>
+      </div>
+      <div class="admin-card" style="grid-column:1/-1">
+        <h3>📤 بارگذاری درس و فایل آموزشی</h3>
+        <label for="lessonUploadTitle">عنوان درس</label>
+        <input id="lessonUploadTitle" type="text" placeholder="مثلاً علوم پنجم — درس ۵">
+        <label for="lessonFile">انتخاب فایل درس (PDF، پاورپوینت یا تصویر)</label>
+        <input id="lessonFile" type="file" accept=".pdf,.ppt,.pptx,.doc,.docx,.jpg,.jpeg,.png">
+        <button class="primary-btn" onclick="demoUpload()">ثبت نمونهٔ بارگذاری</button>
+        <div class="upload-list" id="uploadList"></div>
+        <p class="small-note">این نسخه فقط نام فایل انتخاب‌شده را نمایش می‌دهد و فایل را به اینترنت نمی‌فرستد. برای انتشار درس برای همهٔ دانش‌آموزان، فضای ذخیره‌سازی امن و پایگاه‌داده لازم است.</p>
+      </div>
+    </div>
+  </section>
+</main>
+<footer>آکادمی شوالیه · نسخهٔ نمایشی آموزشی | برای یادگیری ساخته شده، نه جمع‌آوری اطلاعات شخصی</footer>
+</div>
+<script>
+const shortQuestions = [
+ {q:'فسیل چیست؟',a:['باقی‌مانده یا اثر جاندار قدیمی','سنگ آتشفشانی تازه','یک نوع فلز'],c:0},
+ {q:'بیشتر فسیل‌ها در چه چیزی پیدا می‌شوند؟',a:['ابرها','سنگ‌های رسوبی','آب باران'],c:1},
+ {q:'از فسیل‌ها چه چیزی می‌آموزیم؟',a:['رنگ لباس انسان‌ها','وضعیت زندگی در گذشته','سرعت نور'],c:1}
+];
+const longQuestions = [
+ ...shortQuestions,
+ {q:'کدام مورد می‌تواند به تشکیل فسیل کمک کند؟',a:['دفن شدن سریع بقایای جاندار در رسوبات','سوختن کامل بقایا','قرار گرفتن روی سطح داغ'],c:0},
+ {q:'فسیل‌ها چگونه به شناخت تاریخ زمین کمک می‌کنند؟',a:['با نشان دادن جانداران و محیط‌های گذشته','با پیش‌بینی دقیق آب‌وهوا برای فردا','با تعیین سن همه انسان‌های امروزی'],c:0}
+];
+let current='short';
+function selectLesson(btn,title,subtitle){document.querySelectorAll('.lesson').forEach(x=>x.classList.remove('selected'));btn.classList.add('selected');document.getElementById('lessonTitle').textContent=title;document.getElementById('lessonSubtitle').textContent=subtitle;document.getElementById('lessonDesc').textContent=title.includes('درس ۴')?'فسیل‌ها نشانه‌هایی از جانداران گذشته‌اند که در سنگ‌ها یا رسوبات حفظ شده‌اند. با بررسی آن‌ها می‌توان درباره جانداران، محیط زندگی و تغییرات زمین در گذشته اطلاعات به دست آورد.':'این بخش به‌زودی با درس‌ها و تمرین‌های تازه تکمیل می‌شود.';}
+function askAI(){const q=document.getElementById('ask').value.trim();const out=document.getElementById('aiAnswer');if(!q){out.textContent='اول سؤالت را بنویس تا راهنمایی‌ات کنم.';return;}const s=q.includes('فسیل')||q.includes('سنگ')||q.includes('گذشته');out.textContent=s?'راهنمای مأموریت: فسیل، اثر یا باقی‌ماندهٔ جانداری است که در گذشته زندگی می‌کرده. معمولاً وقتی بقایای جاندار زیر رسوبات دفن شوند و در گذر زمان حفظ شوند، امکان تشکیل فسیل به وجود می‌آید. از فسیل‌ها برای شناخت جانداران و محیط‌های گذشته و کمک به تعیین سن نسبی لایه‌های سنگی استفاده می‌کنیم.\n\nاین پاسخ در نسخهٔ نمایشی از راهنمای آماده استفاده می‌کند و هنوز به هوش مصنوعی آنلاین وصل نیست.':'برای پاسخ دقیق‌تر، نام درس یا موضوع را هم بنویس. فعلاً دستیار نمایشی فقط چند راهنمای آماده دربارهٔ درس فسیل‌ها دارد؛ اتصال به هوش مصنوعی واقعی در مرحلهٔ بعدی انجام می‌شود.';}
+function showQuiz(which){current=which;document.getElementById('shortTab').classList.toggle('active',which==='short');document.getElementById('longTab').classList.toggle('active',which==='long');renderQuiz();}
+function renderQuiz(){const data=current==='short'?shortQuestions:longQuestions;document.getElementById('quiz').innerHTML=data.map((x,i)=>`<div class="question"><strong>${i+1}. ${x.q}</strong>${x.a.map((a,j)=>`<label><input type="radio" name="q${i}" value="${j}"> ${a}</label>`).join('')}</div>`).join('');document.getElementById('result').textContent='';}
+function gradeQuiz(){const data=current==='short'?shortQuestions:longQuestions;let score=0;data.forEach((x,i)=>{const v=document.querySelector(`input[name="q${i}"]:checked`);if(v&&Number(v.value)===x.c)score++;});document.getElementById('result').textContent=`نتیجهٔ مأموریت: ${score} از ${data.length} پاسخ درست! ${score===data.length?'عالی بود، قهرمان! 🦇':'یک بار دیگر درس را مرور کن و دوباره تلاش کن.'}`;}
+function demoLogin(){const email=document.getElementById('loginEmail').value.trim();const status=document.getElementById('loginStatus');if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){status.textContent='یک نشانی ایمیل معتبر وارد کن.';return;}status.textContent=`ورود نمایشی برای ${email}؛ احراز هویت واقعی هنوز راه‌اندازی نشده است.`;}
+function addDemoMember(){const email=document.getElementById('memberEmail').value.trim();const role=document.getElementById('memberRole').value;const list=document.getElementById('roleList');if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){alert('لطفاً یک ایمیل معتبر وارد کن.');return;}const item=document.createElement('div');item.className='role-item';item.textContent=`${role==='admin'?'مدیر':'آموزگار'} — ${email} (نمایشی)`;list.appendChild(item);document.getElementById('memberEmail').value='';}
+function demoUpload(){const title=document.getElementById('lessonUploadTitle').value.trim();const file=document.getElementById('lessonFile').files[0];if(!title||!file){alert('عنوان درس و فایل را انتخاب کن.');return;}const item=document.createElement('div');item.className='upload-item';item.textContent=`${title} — ${file.name} (فقط نمونه؛ هنوز منتشر نشده)`;document.getElementById('uploadList').appendChild(item);document.getElementById('lessonUploadTitle').value='';document.getElementById('lessonFile').value='';}
+renderQuiz();
+</script>
+</body>
+</html>
