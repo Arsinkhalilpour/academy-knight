@@ -2,40 +2,56 @@
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090d18">
-<title>ثبت‌نام | آکادمی شوالیه</title>
+<title>ورود و ثبت‌نام | آکادمی شوالیه</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#080c15;--panel:#111b2b;--line:#2b3b53;--gold:#e8bd5b;--text:#f4f6fb;--muted:#9eacc0}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:22px;background:radial-gradient(ellipse at 50% -10%,#233653 0,transparent 48%),var(--bg);color:var(--text);font-family:Vazirmatn,Tahoma,sans-serif}
 .card{width:min(100%,460px);padding:30px;background:linear-gradient(145deg,#152238,#0e1725);border:1px solid var(--line);border-radius:22px;box-shadow:0 24px 80px #0008}
-.brand{text-align:center;margin-bottom:25px}.mark{width:58px;height:58px;margin:0 auto 12px;display:grid;place-items:center;border:1px solid #92763e;border-radius:17px;color:var(--gold);font-size:30px;background:#1d2b40}
-h1{font-size:23px;margin:0}.sub{font-size:11px;color:var(--gold);letter-spacing:2px;margin-top:5px}.intro{text-align:center;color:#bac6d7;font-size:12px;line-height:2;margin:0 0 22px}
+.brand{text-align:center;margin-bottom:22px}.mark{width:58px;height:58px;margin:0 auto 12px;display:grid;place-items:center;border:1px solid #92763e;border-radius:17px;color:var(--gold);font-size:30px;background:#1d2b40}
+h1{font-size:23px;margin:0}.sub{font-size:11px;color:var(--gold);letter-spacing:2px;margin-top:5px}.intro{text-align:center;color:#bac6d7;font-size:12px;line-height:2;margin:0 0 20px}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:5px;background:#0a1220;border:1px solid var(--line);border-radius:12px;margin-bottom:20px}
+.tab{margin:0;padding:10px;border:0;border-radius:8px;background:transparent;color:var(--muted);font:inherit;font-size:12px;cursor:pointer}.tab.active{background:#26364d;color:var(--gold);font-weight:800}
 label{display:block;font-size:11px;color:#c5cede;margin:13px 0 6px}input{width:100%;padding:13px;border-radius:10px;border:1px solid var(--line);background:#0a1220;color:var(--text);font:inherit;font-size:12px;outline:none}input:focus{border-color:var(--gold)}
-button{width:100%;margin-top:20px;padding:13px;border:0;border-radius:10px;background:var(--gold);color:#17130a;font:inherit;font-size:13px;font-weight:800;cursor:pointer}
-.note{margin-top:18px;padding:12px;border:1px solid #66552e;background:#2b2519;color:#f1d99d;border-radius:10px;font-size:10px;line-height:2}
+.submit{width:100%;margin-top:20px;padding:13px;border:0;border-radius:10px;background:var(--gold);color:#17130a;font:inherit;font-size:13px;font-weight:800;cursor:pointer}
+.form{display:none}.form.active{display:block}.note{margin-top:17px;padding:12px;border:1px solid #66552e;background:#2b2519;color:#f1d99d;border-radius:10px;font-size:10px;line-height:2}
 .status{display:none;margin-top:13px;padding:10px;border-radius:9px;background:#1d332b;color:#a9e4c8;font-size:11px;line-height:2}
 footer{text-align:center;color:#718097;font-size:10px;margin-top:20px}
 @media(max-width:480px){.card{padding:23px 18px}}
 </style></head>
 <body><main class="card">
 <header class="brand"><div class="mark">♞</div><h1>آکادمی شوالیه</h1><div class="sub">KNIGHT ACADEMY</div></header>
-<p class="intro">برای درخواست عضویت در آکادمی، فرم زیر را تکمیل کن.</p>
-<form id="signupForm">
-<label for="fullName">نام و نام خانوادگی</label><input id="fullName" name="fullName" autocomplete="name" required placeholder="نام شما">
-<label for="email">ایمیل</label><input id="email" name="email" type="email" autocomplete="email" required placeholder="name@example.com">
-<label for="password">رمز عبور</label><input id="password" name="password" type="password" autocomplete="new-password" minlength="8" required placeholder="حداقل ۸ نویسه">
-<button type="submit">ارسال درخواست ثبت‌نام</button>
+<p class="intro">به آکادمی خوش آمدی! اگر حساب داری وارد شو؛ اگر نه، خیلی راحت ثبت‌نام کن.</p>
+<div class="tabs"><button class="tab active" type="button" data-form="login">ورود به حساب</button><button class="tab" type="button" data-form="signup">ثبت‌نام</button></div>
+<form id="login" class="form active">
+<label for="loginEmail">ایمیل</label><input id="loginEmail" type="email" autocomplete="email" required placeholder="ایمیل حساب کاربری">
+<label for="loginPassword">رمز عبور</label><input id="loginPassword" type="password" autocomplete="current-password" required placeholder="رمز عبور">
+<button class="submit" type="submit">ورود به آکادمی</button>
 </form>
-<div class="note">پس از ثبت‌نام، حساب جدید باید توسط مدیر یا سازنده تأیید شود. نقش معلم یا مدیر فقط از طرف سازنده تعیین می‌شود؛ ثبت‌نام‌کننده نمی‌تواند خودش این نقش‌ها را انتخاب کند.</div>
+<form id="signup" class="form">
+<label for="fullName">نام و نام خانوادگی</label><input id="fullName" autocomplete="name" required placeholder="نام شما">
+<label for="signupEmail">ایمیل</label><input id="signupEmail" type="email" autocomplete="email" required placeholder="name@example.com">
+<label for="signupPassword">رمز عبور</label><input id="signupPassword" type="password" autocomplete="new-password" minlength="8" required placeholder="حداقل ۸ نویسه">
+<button class="submit" type="submit">ساخت حساب و ثبت‌نام</button>
+</form>
+<div class="note">حساب‌های تازه پس از ثبت‌نام در انتظار تأیید می‌مانند. ورود به پنل معلم یا مدیر فقط برای حساب‌های تأییدشده با همان نقش امکان‌پذیر خواهد بود.</div>
 <div id="status" class="status" role="status"></div>
 <footer>KNIGHT ACADEMY · آکادمی شوالیه</footer>
 </main>
 <script>
-document.getElementById("signupForm").addEventListener("submit",function(event){
- event.preventDefault();
- const status=document.getElementById("status");
- status.style.display="block";
- status.textContent="ظاهر فرم آماده است؛ ثبت واقعی حساب پس از اتصال امن به Supabase فعال می‌شود. فعلاً اطلاعات فرم جایی ارسال یا ذخیره نمی‌شود.";
+const statusBox=document.getElementById("status");
+document.querySelectorAll(".tab").forEach(tab=>tab.addEventListener("click",()=>{
+ document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===tab));
+ document.querySelectorAll(".form").forEach(x=>x.classList.toggle("active",x.id===tab.dataset.form));
+ statusBox.style.display="none";
+}));
+document.getElementById("login").addEventListener("submit",e=>{
+ e.preventDefault();statusBox.style.display="block";
+ statusBox.textContent="فرم ورود آماده است؛ برای ورود واقعی و انتقال خودکار به پنل مخصوص هر نقش، باید احراز هویت Supabase را وصل کنیم. فعلاً اطلاعات ارسال یا ذخیره نمی‌شود.";
+});
+document.getElementById("signup").addEventListener("submit",e=>{
+ e.preventDefault();statusBox.style.display="block";
+ statusBox.textContent="فرم ثبت‌نام آماده است؛ ثبت واقعی حساب پس از اتصال Supabase فعال می‌شود. فعلاً اطلاعات ارسال یا ذخیره نمی‌شود.";
 });
 </script></body></html>
