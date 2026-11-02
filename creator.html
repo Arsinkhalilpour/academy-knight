@@ -25,4 +25,30 @@ const titles={overview:"داشبورد Creator",students:"مدیریت دانش�
 function show(id){document.querySelectorAll(".section").forEach(s=>s.classList.toggle("active",s.id===id));document.querySelectorAll(".menu button").forEach(b=>b.classList.toggle("active",b.dataset.target===id));document.getElementById("heading").textContent=titles[id]||titles.overview;window.scrollTo({top:0,behavior:"smooth"});}
 document.querySelectorAll(".menu button").forEach(b=>b.addEventListener("click",()=>show(b.dataset.target)));
 document.querySelectorAll("[data-jump]").forEach(b=>b.addEventListener("click",()=>show(b.dataset.jump)));
-</script></body></html>
+</script>
+<style>body{visibility:hidden}body.auth-ready{visibility:visible}</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(async function(){
+  const SUPABASE_URL="https://rdsermutogewhcdsyoon.supabase.co";
+  const SUPABASE_KEY="sb_publishable_kybJ2B3BKoT2fScPaz6xRQ_eBOSwiqi";
+  const requiredRole="creator";
+  try {
+    const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+    const {data:{session},error:sessionError}=await client.auth.getSession();
+    if(sessionError || !session){location.replace("./index.html?auth=required");return;}
+    const {data:profile,error}=await client.from("ka_profiles")
+      .select("role,approved").eq("id",session.user.id).single();
+    if(error || !profile || profile.approved!==true || profile.role!==requiredRole){
+      await client.auth.signOut();
+      location.replace("./index.html?auth=denied");
+      return;
+    }
+    document.body.classList.add("auth-ready");
+  } catch(e) {
+    location.replace("./index.html?auth=error");
+  }
+})();
+</script>
+
+</body></html>
