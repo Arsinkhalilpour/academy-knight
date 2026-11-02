@@ -43,20 +43,39 @@ footer{text-align:center;color:#718097;font-size:10px;margin-top:20px}
 <script>
 const SUPABASE_URL="https://rdsermutogewhcdsyoon.supabase.co";
 const SUPABASE_KEY="sb_publishable_kybJ2B3BKoT2fScPaz6xRQ_eBOSwiqi";
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const statusBox=document.getElementById("status");
+let supabaseClient=null;
 function showStatus(message,isError=false){
  statusBox.style.display="block";
  statusBox.style.background=isError?"#3a2025":"#1d332b";
  statusBox.style.color=isError?"#ffc1c7":"#a9e4c8";
  statusBox.textContent=message;
 }
+function loadSupabase(){
+ if(supabaseClient) return Promise.resolve(supabaseClient);
+ if(window.supabase && window.supabase.createClient){
+  supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  return Promise.resolve(supabaseClient);
+ }
+ return new Promise((resolve,reject)=>{
+  const script=document.createElement("script");
+  script.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+  script.onload=()=>{
+   if(!window.supabase || !window.supabase.createClient){reject(new Error("کتابخانه اتصال بارگذاری نشد."));return;}
+   supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+   resolve(supabaseClient);
+  };
+  script.onerror=()=>reject(new Error("ارتباط با کتابخانه ورود برقرار نشد. اینترنت یا فیلترشکن را بررسی کن و دوباره تلاش کن."));
+  document.head.appendChild(script);
+ });
+}
 function friendlyError(error){
  const message=(error && error.message)||"خطای نامشخص";
- if(message.toLowerCase().includes("invalid login")) return "ایمیل یا رمز عبور اشتباه است.";
- if(message.toLowerCase().includes("email not confirmed")) return "ابتدا ایمیل خود را تأیید کن.";
- if(message.toLowerCase().includes("already registered")) return "این ایمیل قبلاً ثبت‌نام کرده است؛ وارد حساب شو.";
- return message;
+ const lower=message.toLowerCase();
+ if(lower.includes("invalid login")) return "ایمیل یا رمز عبور اشتباه است.";
+ if(lower.includes("email not confirmed")) return "ابتدا ایمیل خود را تأیید کن.";
+ if(lower.includes("already registered")) return "این ایمیل قبلاً ثبت‌نام کرده است؛ وارد حساب شو.";
+ return "خطا: "+message;
 }
 document.querySelectorAll(".tab").forEach(tab=>tab.addEventListener("click",()=>{
  document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===tab));
@@ -65,40 +84,46 @@ document.querySelectorAll(".tab").forEach(tab=>tab.addEventListener("click",()=>
 }));
 document.getElementById("login").addEventListener("submit",async e=>{
  e.preventDefault();
+ e.stopPropagation();
  const button=e.currentTarget.querySelector("button[type=submit]");
  button.disabled=true;button.textContent="در حال ورود...";
+ showStatus("در حال اتصال و بررسی حساب...");
  try{
+  const client=await loadSupabase();
   const email=document.getElementById("loginEmail").value.trim();
   const password=document.getElementById("loginPassword").value;
-  const {data,error}=await supabase.auth.signInWithPassword({email,password});
+  const {data,error}=await client.auth.signInWithPassword({email,password});
   if(error) throw error;
-  const {data:profile,error:profileError}=await supabase.from("ka_profiles").select("role,approved").eq("id",data.user.id).single();
-  if(profileError) throw new Error("ورود انجام شد، اما اطلاعات نقش حساب خوانده نشد. مدیر باید دسترسی پروفایل را بررسی کند.");
+  const {data:profile,error:profileError}=await client.from("ka_profiles").select("role,approved").eq("id",data.user.id).single();
+  if(profileError) throw new Error("ورود انجام شد، اما خواندن نقش حساب ممکن نشد: "+profileError.message);
   if(!profile || profile.approved!==true){
-   await supabase.auth.signOut();
+   await client.auth.signOut();
    showStatus("حساب شما هنوز توسط مدیر تأیید نشده است.",true);
    return;
   }
   const destinations={creator:"creator.html",admin:"admin.html",teacher:"teacher.html"};
   if(!destinations[profile.role]){
-   await supabase.auth.signOut();
-   showStatus("دسترسی این حساب به پنل‌های آکادمی فعال نیست. فقط مدیر، معلم و سازنده می‌توانند وارد پنل شوند.",true);
+   await client.auth.signOut();
+   showStatus("این حساب اجازه ورود به پنل‌ها را ندارد.",true);
    return;
   }
-  showStatus("ورود موفق بود؛ در حال انتقال به پنل...");
-  window.location.href=destinations[profile.role];
+  showStatus("ورود موفق بود؛ در حال انتقال...");
+  window.location.assign(destinations[profile.role]);
  }catch(error){showStatus(friendlyError(error),true);}
  finally{button.disabled=false;button.textContent="ورود به آکادمی";}
 });
 document.getElementById("signup").addEventListener("submit",async e=>{
  e.preventDefault();
+ e.stopPropagation();
  const button=e.currentTarget.querySelector("button[type=submit]");
  button.disabled=true;button.textContent="در حال ثبت‌نام...";
+ showStatus("در حال اتصال و ساخت حساب...");
  try{
+  const client=await loadSupabase();
   const fullName=document.getElementById("fullName").value.trim();
   const email=document.getElementById("signupEmail").value.trim();
   const password=document.getElementById("signupPassword").value;
-  const {data,error}=await supabase.auth.signUp({email,password,options:{data:{full_name:fullName}}});
+  const {data,error}=await client.auth.signUp({email,password,options:{data:{full_name:fullName}}});
   if(error) throw error;
   if(data.session){
    showStatus("ثبت‌نام انجام شد. حساب شما پس از تأیید مدیر امکان ورود به پنل را خواهد داشت.");
