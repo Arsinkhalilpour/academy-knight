@@ -1,84 +1,41 @@
 <!doctype html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#090d18">
-  <title>آکادمی شوالیه | داشبورد</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root{--bg:#080c15;--panel:#101827;--panel2:#141f31;--line:#26334a;--gold:#e6b94f;--gold2:#f6d987;--text:#f4f6fb;--muted:#9aa8bd;--blue:#6b9cff;--green:#55c99a}
-    *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 75% -15%,#1b2a43 0,transparent 45%),var(--bg);color:var(--text);font-family:Vazirmatn,Tahoma,sans-serif;min-height:100vh}
-    button{font:inherit}.layout{display:grid;grid-template-columns:260px 1fr;min-height:100vh}.sidebar{background:#0b111e;border-left:1px solid var(--line);padding:25px 18px;display:flex;flex-direction:column;gap:28px}.brand{display:flex;align-items:center;gap:12px;padding:4px 8px 20px;border-bottom:1px solid var(--line)}.brand-mark{width:46px;height:46px;border:1px solid #8f7134;border-radius:14px;display:grid;place-items:center;color:var(--gold);font-size:25px;background:linear-gradient(145deg,#27344a,#111827)}.brand strong{display:block;font-size:15px}.brand small{color:var(--gold);font-size:11px;letter-spacing:1px}.nav-label{color:#718099;font-size:11px;padding:0 12px;margin-bottom:8px}.nav{display:grid;gap:6px}.nav button{border:0;background:transparent;color:#b9c4d5;text-align:right;padding:12px 13px;border-radius:11px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:.2s}.nav button:hover,.nav button.active{background:#1a2639;color:var(--gold2)}.nav .ico{width:22px;text-align:center;font-size:17px}.side-bottom{margin-top:auto;background:#121d2d;border:1px solid var(--line);border-radius:14px;padding:14px}.side-bottom b{font-size:13px}.side-bottom p{font-size:11px;color:var(--muted);line-height:1.9;margin:7px 0 0}
-    main{padding:30px clamp(18px,4vw,52px);max-width:1500px;width:100%;margin:auto}.topbar{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:30px}.eyebrow{font-size:12px;color:var(--gold);margin-bottom:5px}.topbar h1{font-size:clamp(22px,3vw,30px);margin:0}.top-actions{display:flex;align-items:center;gap:10px}.icon-btn,.profile{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:12px;padding:10px 13px}.profile{display:flex;align-items:center;gap:9px;font-size:12px}.avatar{width:30px;height:30px;border-radius:50%;background:#33415a;color:var(--gold2);display:grid;place-items:center;font-weight:700}
-    .hero{position:relative;overflow:hidden;background:linear-gradient(110deg,#1b2b43,#111a2a 62%,#182236);border:1px solid #34445d;border-radius:20px;padding:28px 30px;margin-bottom:22px}.hero:after{content:"🦇";position:absolute;left:5%;top:-28px;font-size:145px;opacity:.07;transform:rotate(-12deg)}.hero h2{margin:0 0 8px;font-size:22px}.hero p{margin:0;color:#bdc9d9;font-size:13px;line-height:2;max-width:620px}.hero-tag{display:inline-block;margin-top:17px;color:#17130a;background:var(--gold);border-radius:8px;padding:7px 12px;font-size:11px;font-weight:800}
-    .section-head{display:flex;align-items:center;justify-content:space-between;margin:26px 0 13px}.section-head h3{font-size:16px;margin:0}.section-head span{font-size:11px;color:var(--muted)}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}.stat,.panel{background:linear-gradient(145deg,#131e2e,#0f1725);border:1px solid var(--line);border-radius:16px}.stat{padding:17px}.stat-top{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:11px}.stat-icon{width:35px;height:35px;border-radius:10px;display:grid;place-items:center;background:#202e43;color:var(--gold2);font-size:17px}.stat strong{display:block;font-size:25px;margin:13px 0 2px}.stat small{color:#8190a6;font-size:10px}
-    .columns{display:grid;grid-template-columns:1.25fr .85fr;gap:14px}.panel{padding:19px}.subject-list{display:grid;gap:12px}.subject{display:flex;align-items:center;gap:12px;padding:11px;border-radius:12px;background:#172235}.subject-icon{width:39px;height:39px;border-radius:11px;background:#26364d;display:grid;place-items:center;font-size:19px}.subject-info{flex:1}.subject-info b{font-size:12px;display:block}.subject-info small{font-size:10px;color:var(--muted)}.arrow{color:var(--gold);font-size:18px}.activity{display:grid;gap:16px}.activity-item{display:flex;gap:11px;align-items:flex-start}.dot{width:9px;height:9px;background:var(--gold);border-radius:50%;margin-top:7px;box-shadow:0 0 0 4px #44371e}.activity-item b{display:block;font-size:12px}.activity-item small{color:var(--muted);font-size:10px}.empty-note{color:var(--muted);font-size:11px;line-height:2}
-    .mobile-menu{display:none}.footer{text-align:center;color:#66758b;font-size:10px;padding:28px 0 8px}
-    @media(max-width:950px){.layout{grid-template-columns:215px 1fr}.stats{grid-template-columns:repeat(2,1fr)}.columns{grid-template-columns:1fr}}
-    @media(max-width:650px){.layout{display:block}.sidebar{display:none}.mobile-menu{display:inline-block}.topbar{align-items:flex-start}.profile span:last-child{display:none}main{padding:20px 15px}.hero{padding:22px 19px}.hero:after{font-size:100px;left:0}.stats{gap:9px}.stat{padding:13px}.stat strong{font-size:21px}.top-actions{gap:6px}}
-  </style>
-</head>
-<body>
-<div class="layout">
-  <aside class="sidebar">
-    <div class="brand"><div class="brand-mark">♞</div><div><strong>آکادمی شوالیه</strong><small>KNIGHT ACADEMY</small></div></div>
-    <div><div class="nav-label">داشبورد</div><nav class="nav">
-      <button class="active" data-title="نمای کلی"><span class="ico">⌂</span>نمای کلی</button>
-      <button data-title="مدیریت دانش‌آموزان"><span class="ico">♙</span>دانش‌آموزان</button>
-      <button data-title="مدیریت معلمان"><span class="ico">♟</span>معلمان</button>
-      <button data-title="درس‌ها و محتوای آموزشی"><span class="ico">▤</span>درس‌ها و محتوا</button>
-      <button data-title="کارت‌های تلاش"><span class="ico">✦</span>کارت‌های تلاش</button>
-      <button data-title="لوح‌های تقدیر"><span class="ico">♜</span>لوح‌های تقدیر</button>
-      <button data-title="تنظیمات آکادمی"><span class="ico">⚙</span>تنظیمات</button>
-    </nav></div>
-    <div class="side-bottom"><b>پنل مالک آکادمی</b><p>این داشبورد در حال ساخته‌شدن است. بخش‌های مدیریتی در مراحل بعد به پایگاه داده متصل می‌شوند.</p></div>
-  </aside>
-  <main>
-    <header class="topbar">
-      <div><div class="eyebrow">مرکز فرماندهی شوالیه‌ها</div><h1 id="pageTitle">نمای کلی داشبورد</h1></div>
-      <div class="top-actions"><button class="icon-btn mobile-menu" aria-label="منو">☰</button><button class="icon-btn" aria-label="اعلان‌ها">♧</button><div class="profile"><div class="avatar">C</div><span>حساب Creator</span><span>⌄</span></div></div>
-    </header>
-    <section class="hero"><h2>به آکادمی شوالیه خوش آمدی!</h2><p>اینجا مرکز مدیریت یک آکادمی آموزشی هوشمند است؛ جایی برای یادگیری، تلاش و پیشرفت. داشبورد را قدم‌به‌قدم به امکانات واقعی مجهز می‌کنیم.</p><span class="hero-tag">قدرت دانش، نشان شوالیه</span></section>
-    <div class="section-head"><h3>ورود به پنل‌ها</h3><span>پیش‌نمایش پنل‌های چهارگانه</span></div>
-    <section class="stats" style="margin-bottom:22px">
-      <a class="stat" href="creator.html" style="text-decoration:none;color:inherit"><div class="stat-top"><span>پنل سازنده</span><span class="stat-icon">♛</span></div><strong style="font-size:17px">Creator</strong><small>مدیریت کل آکادمی</small></a>
-      <a class="stat" href="admin.html" style="text-decoration:none;color:inherit"><div class="stat-top"><span>پنل مدیر</span><span class="stat-icon">🛡️</span></div><strong style="font-size:17px">Admin</strong><small>مدیریت کاربران و محتوا</small></a>
-      <a class="stat" href="teacher.html" style="text-decoration:none;color:inherit"><div class="stat-top"><span>پنل معلم</span><span class="stat-icon">🎓</span></div><strong style="font-size:17px">Teacher</strong><small>آموزش و محتوای درسی</small></a>
-      <a class="stat" href="student.html" style="text-decoration:none;color:inherit"><div class="stat-top"><span>پنل دانش‌آموز</span><span class="stat-icon">📚</span></div><strong style="font-size:17px">Student</strong><small>یادگیری و پاداش‌ها</small></a>
-    </section>
-    <div class="section-head"><h3>وضعیت آکادمی</h3><span>اطلاعات نمایشی — هنوز متصل به داده‌های واقعی نیست</span></div>
-    <section class="stats">
-      <article class="stat"><div class="stat-top"><span>دانش‌آموزان</span><span class="stat-icon">♙</span></div><strong>۰</strong><small>حساب تأییدشده</small></article>
-      <article class="stat"><div class="stat-top"><span>معلمان</span><span class="stat-icon">♟</span></div><strong>۰</strong><small>اعضای آموزشی</small></article>
-      <article class="stat"><div class="stat-top"><span>درس‌ها</span><span class="stat-icon">▤</span></div><strong>۰</strong><small>محتوای منتشرشده</small></article>
-      <article class="stat"><div class="stat-top"><span>کارت‌های تلاش</span><span class="stat-icon">✦</span></div><strong>۰</strong><small>کارت ثبت‌شده</small></article>
-    </section>
-    <div class="columns">
-      <section><div class="section-head"><h3>درس‌های پایه پنجم</h3><span>۵ درس اصلی</span></div><div class="panel subject-list">
-        <div class="subject"><div class="subject-icon">➗</div><div class="subject-info"><b>ریاضی</b><small>آموزش و تمرین</small></div><span class="arrow">‹</span></div>
-        <div class="subject"><div class="subject-icon">📚</div><div class="subject-info"><b>فارسی</b><small>خواندن، نوشتن و نگارش</small></div><span class="arrow">‹</span></div>
-        <div class="subject"><div class="subject-icon">🌍</div><div class="subject-info"><b>مطالعات اجتماعی</b><small>جامعه و جهان پیرامون</small></div><span class="arrow">‹</span></div>
-        <div class="subject"><div class="subject-icon">📖</div><div class="subject-info"><b>قرآن</b><small>روخوانی و مفاهیم</small></div><span class="arrow">‹</span></div>
-        <div class="subject"><div class="subject-icon">🌱</div><div class="subject-info"><b>هدیه‌های آسمانی</b><small>درس‌ها و فعالیت‌ها</small></div><span class="arrow">‹</span></div>
-      </div></section>
-      <section><div class="section-head"><h3>رویدادهای اخیر</h3><span>فعالیت سیستم</span></div><div class="panel activity">
-        <div class="activity-item"><span class="dot"></span><div><b>ساخت داشبورد جدید آغاز شد</b><small>نسخه پایه رابط کاربری</small></div></div>
-        <div class="activity-item"><span class="dot"></span><div><b>ساختار درس‌های پایه پنجم آماده شد</b><small>۵ عنوان درسی</small></div></div>
-        <p class="empty-note">پس از اتصال Supabase، ثبت‌نام‌ها، فعالیت معلمان و کارت‌های تلاش در این قسمت نمایش داده می‌شوند.</p>
-      </div></section>
-    </div>
-    <div class="footer">KNIGHT ACADEMY · آکادمی شوالیه · نسخه آغازین داشبورد</div>
-  </main>
-</div>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090d18">
+<title>ثبت‌نام | آکادمی شوالیه</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080c15;--panel:#111b2b;--line:#2b3b53;--gold:#e8bd5b;--text:#f4f6fb;--muted:#9eacc0}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:22px;background:radial-gradient(ellipse at 50% -10%,#233653 0,transparent 48%),var(--bg);color:var(--text);font-family:Vazirmatn,Tahoma,sans-serif}
+.card{width:min(100%,460px);padding:30px;background:linear-gradient(145deg,#152238,#0e1725);border:1px solid var(--line);border-radius:22px;box-shadow:0 24px 80px #0008}
+.brand{text-align:center;margin-bottom:25px}.mark{width:58px;height:58px;margin:0 auto 12px;display:grid;place-items:center;border:1px solid #92763e;border-radius:17px;color:var(--gold);font-size:30px;background:#1d2b40}
+h1{font-size:23px;margin:0}.sub{font-size:11px;color:var(--gold);letter-spacing:2px;margin-top:5px}.intro{text-align:center;color:#bac6d7;font-size:12px;line-height:2;margin:0 0 22px}
+label{display:block;font-size:11px;color:#c5cede;margin:13px 0 6px}input{width:100%;padding:13px;border-radius:10px;border:1px solid var(--line);background:#0a1220;color:var(--text);font:inherit;font-size:12px;outline:none}input:focus{border-color:var(--gold)}
+button{width:100%;margin-top:20px;padding:13px;border:0;border-radius:10px;background:var(--gold);color:#17130a;font:inherit;font-size:13px;font-weight:800;cursor:pointer}
+.note{margin-top:18px;padding:12px;border:1px solid #66552e;background:#2b2519;color:#f1d99d;border-radius:10px;font-size:10px;line-height:2}
+.status{display:none;margin-top:13px;padding:10px;border-radius:9px;background:#1d332b;color:#a9e4c8;font-size:11px;line-height:2}
+footer{text-align:center;color:#718097;font-size:10px;margin-top:20px}
+@media(max-width:480px){.card{padding:23px 18px}}
+</style></head>
+<body><main class="card">
+<header class="brand"><div class="mark">♞</div><h1>آکادمی شوالیه</h1><div class="sub">KNIGHT ACADEMY</div></header>
+<p class="intro">برای درخواست عضویت در آکادمی، فرم زیر را تکمیل کن.</p>
+<form id="signupForm">
+<label for="fullName">نام و نام خانوادگی</label><input id="fullName" name="fullName" autocomplete="name" required placeholder="نام شما">
+<label for="email">ایمیل</label><input id="email" name="email" type="email" autocomplete="email" required placeholder="name@example.com">
+<label for="password">رمز عبور</label><input id="password" name="password" type="password" autocomplete="new-password" minlength="8" required placeholder="حداقل ۸ نویسه">
+<button type="submit">ارسال درخواست ثبت‌نام</button>
+</form>
+<div class="note">پس از ثبت‌نام، حساب جدید باید توسط مدیر یا سازنده تأیید شود. نقش معلم یا مدیر فقط از طرف سازنده تعیین می‌شود؛ ثبت‌نام‌کننده نمی‌تواند خودش این نقش‌ها را انتخاب کند.</div>
+<div id="status" class="status" role="status"></div>
+<footer>KNIGHT ACADEMY · آکادمی شوالیه</footer>
+</main>
 <script>
-  document.querySelectorAll('.nav button').forEach(button=>button.addEventListener('click',()=>{
-    document.querySelectorAll('.nav button').forEach(item=>item.classList.remove('active'));
-    button.classList.add('active');
-    document.getElementById('pageTitle').textContent=button.dataset.title;
-  }));
-</script>
-</body>
-</html>
+document.getElementById("signupForm").addEventListener("submit",function(event){
+ event.preventDefault();
+ const status=document.getElementById("status");
+ status.style.display="block";
+ status.textContent="ظاهر فرم آماده است؛ ثبت واقعی حساب پس از اتصال امن به Supabase فعال می‌شود. فعلاً اطلاعات فرم جایی ارسال یا ذخیره نمی‌شود.";
+});
+</script></body></html>
