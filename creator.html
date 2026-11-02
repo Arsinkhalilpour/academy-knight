@@ -24,7 +24,8 @@
 const titles={overview:"داشبورد Creator",students:"مدیریت دانش‌آموزان",teachers:"مدیریت معلمان",managers:"مدیریت مدیران",content:"درس‌ها و محتوای آموزشی",rewards:"کارت‌های تلاش و لوح تقدیر",settings:"تنظیمات آکادمی"};
 function show(id){document.querySelectorAll(".section").forEach(s=>s.classList.toggle("active",s.id===id));document.querySelectorAll(".menu button").forEach(b=>b.classList.toggle("active",b.dataset.target===id));document.getElementById("heading").textContent=titles[id]||titles.overview;window.scrollTo({top:0,behavior:"smooth"});}
 document.querySelectorAll(".menu button").forEach(b=>b.addEventListener("click",()=>show(b.dataset.target)));
-document.querySelectorAll("[data-jump]").forEach(b=>b.addEventListener("click",()=>show(b.dataset.jump)));\n
+document.querySelectorAll("[data-jump]").forEach(b=>b.addEventListener("click",()=>show(b.dataset.jump)));
+
 
 async function loadApprovedUsers(){
  const body=document.getElementById("approvedUsers");
@@ -96,7 +97,8 @@ document.getElementById("refreshRoles")?.addEventListener("click",loadApprovedUs
   const SUPABASE_KEY="sb_publishable_kybJ2B3BKoT2fScPaz6xRQ_eBOSwiqi";
   const requiredRole="creator";
   try {
-    const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);\n    window.kaSupabase=client;
+    const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+    window.kaSupabase=client;
     const {data:{session},error:sessionError}=await client.auth.getSession();
     if(sessionError || !session){location.replace("./index.html?auth=required");return;}
     const {data:profile,error}=await client.from("ka_profiles")
