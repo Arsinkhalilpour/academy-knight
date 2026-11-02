@@ -15,7 +15,7 @@
 <section id="overview" class="section active"><div class="cards"><div class="card"><small>دانش‌آموزان</small><strong>۰</strong></div><div class="card"><small>معلمان</small><strong>۰</strong></div><div class="card"><small>درخواست‌های تأیید</small><strong>۰</strong></div><div class="card"><small>محتوای آموزشی</small><strong>۰</strong></div></div><div class="section-title"><div><h2>میانبرهای مدیریت</h2><p>انتخاب بخش برای ادامه کار</p></div></div><div class="box actions"><button class="btn" data-jump="students">مدیریت دانش‌آموزان</button><button class="btn" data-jump="teachers">مدیریت معلمان</button><button class="btn" data-jump="content">افزودن محتوای درسی</button><button class="btn" data-jump="rewards">سیستم پاداش</button></div></section>
 <section id="students" class="section"><div class="section-title"><div><h2>مدیریت دانش‌آموزان</h2><p>بررسی و تأیید درخواست‌های عضویت</p></div><button class="btn gold" id="refreshPending">به‌روزرسانی فهرست</button></div><div class="box table-wrap"><table class="table"><thead><tr><th>نام</th><th>ایمیل</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody id="pendingUsers"><tr><td colspan="4" class="empty">برای دریافت درخواست‌ها روی «به‌روزرسانی فهرست» بزن.</td></tr></tbody></table></div><p class="help">درخواست‌های ثبت‌نام تأییدنشده اینجا نمایش داده می‌شوند. نقش پیش‌فرض کاربران پس از ثبت‌نام دانش‌آموز است.</p></section>
 <section id="teachers" class="section"><div class="section-title"><div><h2>مدیریت معلمان</h2><p>ایجاد و مدیریت دسترسی معلمان</p></div></div><div class="box"><div class="formgrid"><label><span class="field-label">نام معلم</span><input class="field" placeholder="نام و نام خانوادگی" disabled></label><label><span class="field-label">ایمیل معلم</span><input class="field" placeholder="teacher@example.com" disabled></label></div><button class="btn gold" disabled>افزودن معلم — در مرحله اتصال فعال می‌شود</button><p class="help">فعلاً هیچ حسابی ساخته نمی‌شود. مدیریت نقش‌ها باید از مسیر امن سمت سرور انجام شود.</p></div></section>
-<section id="managers" class="section"><div class="section-title"><div><h2>مدیریت مدیران</h2><p>افزودن مدیر و کنترل دسترسی‌های مدیریتی</p></div><span class="tag">ویژه Creator</span></div><div class="notice">فقط حساب Creator اجازه تعیین یا لغو نقش مدیر را دارد. مدیران نمی‌توانند نقش Creator ایجاد کنند یا تغییر دهند.</div><div class="box"><div class="formgrid"><label><span class="field-label">ایمیل حساب کاربر</span><input class="field" placeholder="manager@example.com" disabled></label><label><span class="field-label">سطح دسترسی</span><select class="field" disabled><option>مدیر آکادمی</option><option>مدیر محتوا</option><option>مدیر کاربران</option></select></label></div><button class="btn gold" disabled>تعیین مدیر — پس از اتصال امن فعال می‌شود</button><p class="help">در نسخه متصل، فقط کاربران ثبت‌نام‌کرده و تأییدشده قابل انتخاب خواهند بود.</p></div><div class="section-title"><div><h2>فهرست مدیران</h2><p>مدیران فعلی آکادمی</p></div></div><div class="box table-wrap"><table class="table"><thead><tr><th>نام</th><th>ایمیل</th><th>دسترسی</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody><tr><td colspan="5" class="empty">هنوز فهرست مدیران از پایگاه داده بارگذاری نشده است.</td></tr></tbody></table></div></section>
+<section id="managers" class="section"><div class="section-title"><div><h2>مدیریت مدیران</h2><p>افزودن مدیر و کنترل دسترسی‌های مدیریتی</p></div><span class="tag">ویژه Creator</span></div><div class="notice">فقط حساب Creator اجازه تعیین یا لغو نقش مدیر را دارد. مدیران نمی‌توانند نقش Creator ایجاد کنند یا تغییر دهند.</div><div class="notice">از فهرست کاربران تأییدشده، نقش هر کاربر را انتخاب و ذخیره کن. نقش Creator قابل واگذاری یا تغییر نیست.</div><div class="section-title"><div><h2>فهرست کاربران تأییدشده</h2><p>تغییر نقش دانش‌آموز، معلم و مدیر</p></div><button class="btn gold" id="refreshRoles">به‌روزرسانی کاربران</button></div><div class="box table-wrap"><table class="table"><thead><tr><th>نام</th><th>ایمیل</th><th>نقش فعلی</th><th>نقش جدید</th><th>عملیات</th></tr></thead><tbody id="approvedUsers"><tr><td colspan="5" class="empty">برای دریافت کاربران روی دکمه بالا بزن.</td></tr></tbody></table></div></section>
 <section id="content" class="section"><div class="section-title"><div><h2>درس‌ها و محتوای آموزشی</h2><p>ساختار دروس پایه پنجم</p></div></div><div class="box"><div class="formgrid"><label><span class="field-label">عنوان درس</span><input class="field" placeholder="مثلاً کسرها" disabled></label><label><span class="field-label">موضوع درسی</span><select class="field" disabled><option>انتخاب درس</option><option>ریاضی</option><option>فارسی</option><option>مطالعات اجتماعی</option><option>قرآن</option><option>هدیه‌های آسمانی</option></select></label></div><label><span class="field-label">توضیحات</span><textarea class="field" rows="3" placeholder="توضیح کوتاه درباره درس" disabled></textarea></label><button class="btn gold" disabled>ثبت درس — در مرحله اتصال فعال می‌شود</button></div></section>
 <section id="rewards" class="section"><div class="section-title"><div><h2>کارت‌های تلاش و لوح تقدیر</h2><p>قانون پاداش آکادمی</p></div></div><div class="cards"><div class="card"><small>هر ۱۰ کارت تلاش معلم</small><strong>۱ لوح</strong></div><div class="card"><small>هر ۱ کارت تلاش مدیر</small><strong>۱ لوح</strong></div></div><div class="box" style="margin-top:13px"><p class="help">شمارش کارت‌ها و صدور خودکار لوح‌ها پس از اتصال به پایگاه داده فعال می‌شود. این صفحه فعلاً فقط قوانین را نمایش می‌دهد.</p></div></section>
 <section id="settings" class="section"><div class="section-title"><div><h2>تنظیمات آکادمی</h2><p>اطلاعات پایه پروژه</p></div></div><div class="box"><p class="help">نام: آکادمی شوالیه<br>پایه: پنجم دبستان ایران<br>زبان: فارسی — راست‌چین<br>پوسته: سرمه‌ای، مشکی و طلایی<br>نقش مالک: Creator</p></div></section>
@@ -25,6 +25,38 @@ const titles={overview:"داشبورد Creator",students:"مدیریت دانش�
 function show(id){document.querySelectorAll(".section").forEach(s=>s.classList.toggle("active",s.id===id));document.querySelectorAll(".menu button").forEach(b=>b.classList.toggle("active",b.dataset.target===id));document.getElementById("heading").textContent=titles[id]||titles.overview;window.scrollTo({top:0,behavior:"smooth"});}
 document.querySelectorAll(".menu button").forEach(b=>b.addEventListener("click",()=>show(b.dataset.target)));
 document.querySelectorAll("[data-jump]").forEach(b=>b.addEventListener("click",()=>show(b.dataset.jump)));\n
+
+async function loadApprovedUsers(){
+ const body=document.getElementById("approvedUsers");
+ if(!body || !window.kaSupabase)return;
+ body.innerHTML='<tr><td colspan="5" class="empty">در حال دریافت کاربران...</td></tr>';
+ const {data,error}=await window.kaSupabase.rpc("ka_creator_list_users");
+ if(error){body.innerHTML='<tr><td colspan="5" class="empty">خطا: '+error.message+'</td></tr>';return;}
+ if(!data || !data.length){body.innerHTML='<tr><td colspan="5" class="empty">کاربر تأییدشده‌ای پیدا نشد.</td></tr>';return;}
+ body.innerHTML="";
+ data.forEach(user=>{
+  const tr=document.createElement("tr");
+  const name=document.createElement("td");name.textContent=user.full_name||"بدون نام";
+  const email=document.createElement("td");email.textContent=user.email||"—";
+  const current=document.createElement("td");current.textContent=({student:"دانش‌آموز",teacher:"معلم",admin:"مدیر",creator:"Creator"})[user.role]||user.role;
+  const roleCell=document.createElement("td");
+  const select=document.createElement("select");select.className="field";select.style.minWidth="115px";
+  [["student","دانش‌آموز"],["teacher","معلم"],["admin","مدیر"]].forEach(([v,label])=>{const o=document.createElement("option");o.value=v;o.textContent=label;select.append(o);});
+  select.value=user.role;
+  const action=document.createElement("td");
+  const save=document.createElement("button");save.className="btn gold";save.textContent="ذخیره";
+  if(user.role==="creator"){select.disabled=true;save.disabled=true;current.textContent="Creator (محافظت‌شده)";}
+  save.onclick=async()=>{
+   save.disabled=true;save.textContent="در حال ذخیره...";
+   const {error}=await window.kaSupabase.rpc("ka_creator_set_role",{target_id:user.user_id,new_role:select.value});
+   if(error){alert("تغییر نقش انجام نشد: "+error.message);save.disabled=false;save.textContent="ذخیره";return;}
+   await loadApprovedUsers();
+  };
+  roleCell.append(select);action.append(save);tr.append(name,email,current,roleCell,action);body.append(tr);
+ });
+}
+document.getElementById("refreshRoles")?.addEventListener("click",loadApprovedUsers);
+
 async function loadPendingUsers(){
  const body=document.getElementById("pendingUsers");
  if(!body || !window.kaSupabase) return;
@@ -53,6 +85,7 @@ async function reviewUser(id,fn,row){
  await loadPendingUsers();
 }
 document.getElementById("refreshPending")?.addEventListener("click",loadPendingUsers);
+document.getElementById("refreshRoles")?.addEventListener("click",loadApprovedUsers);
 
 </script>
 <style>body{visibility:hidden}body.auth-ready{visibility:visible}</style>
