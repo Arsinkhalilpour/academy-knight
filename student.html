@@ -1,2 +1,63 @@
 <!doctype html>
-<html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="refresh" content="0;url=index.html"><title>دسترسی محدود | آکادمی شوالیه</title></head><body><p>صفحه دانش‌آموز در این نسخه فعال نیست. <a href="index.html">بازگشت به ثبت‌نام</a></p><script>location.replace("index.html");</script></body></html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101827">
+<title>پنل دانش‌آموز | آکادمی شوالیه</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#172033;--muted:#687386;--line:#e5e9f0;--paper:#f5f7fb;--gold:#e9bd5b;--navy:#101a2b}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Vazirmatn,Tahoma,sans-serif;visibility:hidden}body.ready{visibility:visible}
+header{background:#fff;border-bottom:1px solid var(--line);padding:15px max(20px,calc((100% - 1100px)/2));display:flex;justify-content:space-between;align-items:center;gap:12px}.brand{font-weight:800;font-size:18px}.brand small{display:block;color:var(--muted);font-size:10px;font-weight:500}.user{font-size:12px;color:var(--muted)}
+main{width:min(1100px,calc(100% - 32px));margin:26px auto 60px}.hero{background:radial-gradient(circle at 90% 0,#344765,transparent 35%),linear-gradient(120deg,#0d1524,#1c2b43);color:#fff;border:1px solid #33445f;border-radius:22px;padding:25px;display:flex;justify-content:space-between;align-items:center;gap:18px;box-shadow:0 16px 35px #17203318}.hero h1{margin:0 0 8px;font-size:23px}.hero p{margin:0;color:#d0d8e5;font-size:13px;line-height:2}.emblem{width:70px;height:70px;flex:0 0 70px;border:1px solid #9a7a3e;border-radius:20px;display:grid;place-items:center;color:var(--gold);font-size:35px;background:#ffffff0b}.gold{color:var(--gold)}
+.section-title{margin:28px 0 13px;font-size:17px}.subjects{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:13px}.subject,.lesson,.empty{background:#fff;border:1px solid var(--line);border-radius:15px;padding:17px}.subject{display:flex;align-items:center;gap:12px;font-weight:700}.subject span{width:38px;height:38px;border-radius:12px;background:#edf1f7;display:grid;place-items:center;font-size:20px}.subject small{display:block;color:var(--muted);font-size:10px;font-weight:400;margin-top:3px}.lessons{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:13px}.lesson h3{font-size:14px;margin:0 0 7px}.lesson p{font-size:11px;color:var(--muted);line-height:1.9;margin:0}.tag{display:inline-block;margin-top:12px;padding:5px 9px;border-radius:20px;background:#edf4ff;color:#315d9a;font-size:10px}.empty{color:var(--muted);font-size:12px;line-height:2;grid-column:1/-1}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:13px}.stat{background:#fff;border:1px solid var(--line);border-radius:15px;padding:16px}.stat b{display:block;font-size:23px;color:#263c5c}.stat small{color:var(--muted);font-size:11px}
+button{font:inherit;border:0;border-radius:9px;padding:9px 13px;cursor:pointer}.logout{background:#edf0f5;color:#28364c;font-size:11px}.status{margin:14px 0;padding:12px;background:#fff3d7;color:#75571b;border-radius:10px;font-size:12px;display:none}
+@media(max-width:600px){header{align-items:flex-start}.hero{padding:19px}.hero h1{font-size:19px}.emblem{width:55px;height:55px;flex-basis:55px}}
+</style></head>
+<body>
+<header><div class="brand">آکادمی شوالیه <small>پنل دانش‌آموز</small></div><div class="user"><span id="studentName">دانش‌آموز</span>　<button class="logout" id="logout">خروج</button></div></header>
+<main>
+<section class="hero"><div><h1>سلام، قهرمان یادگیری! <span class="gold">✦</span></h1><p>اینجا می‌توانی درس‌هایت را ببینی، فایل‌های آموزشی را پیدا کنی و پیشرفتت را دنبال کنی.</p></div><div class="emblem">♞</div></section>
+<div id="status" class="status"></div>
+<h2 class="section-title">درس‌های پایه پنجم</h2>
+<section class="subjects">
+<div class="subject"><span>➗</span><div>ریاضی<small>تمرین و آموزش</small></div></div>
+<div class="subject"><span>📖</span><div>فارسی<small>خواندن و نوشتن</small></div></div>
+<div class="subject"><span>🌍</span><div>مطالعات اجتماعی<small>شناخت جهان پیرامون</small></div></div>
+<div class="subject"><span>☪</span><div>قرآن<small>آموزش و روخوانی</small></div></div>
+<div class="subject"><span>🌱</span><div>هدیه‌های آسمانی<small>درس‌های زندگی</small></div></div>
+</section>
+<h2 class="section-title">آخرین آموزش‌ها</h2><section class="lessons" id="lessons"><div class="empty">در حال دریافت آموزش‌ها...</div></section>
+<h2 class="section-title">پیشرفت من</h2><section class="cards">
+<div class="stat"><b id="effortCount">۰</b><small>کارت تلاش دریافت‌شده</small></div>
+<div class="stat"><b id="certificateCount">۰</b><small>لوح تقدیر من</small></div>
+</section>
+</main>
+<script>
+const SUPABASE_URL="https://rdsermutogewhcdsyoon.supabase.co";
+const SUPABASE_KEY="sb_publishable_kybJ2B3BKoT2fScPaz6xRQ_eBOSwiqi";
+(async()=>{
+ const status=document.getElementById("status");
+ const say=t=>{status.textContent=t;status.style.display="block"};
+ try{
+  if(!window.supabase?.createClient)throw new Error("کتابخانه ورود بارگذاری نشد؛ اتصال اینترنت را بررسی کن.");
+  const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  const {data:{session}}=await client.auth.getSession();
+  if(!session){location.replace("index.html");return}
+  const {data:profile,error}=await client.from("ka_profiles").select("role,approved").eq("id",session.user.id).single();
+  if(error||!profile||profile.role!=="student"||profile.approved!==true){await client.auth.signOut();location.replace("index.html");return}
+  document.getElementById("studentName").textContent=session.user.user_metadata?.full_name||session.user.email;
+  document.body.classList.add("ready");
+  const {data:lessons, error:lessonError}=await client.from("ka_lessons").select("id,title,description,created_at").eq("published",true).order("created_at",{ascending:false}).limit(8);
+  const list=document.getElementById("lessons");list.innerHTML="";
+  if(lessonError){list.innerHTML='<div class="empty">فعلاً امکان دریافت فهرست آموزش‌ها نیست.</div>'}
+  else if(!lessons?.length){list.innerHTML='<div class="empty">هنوز آموزشی منتشر نشده است. به‌زودی درس‌های تازه اینجا قرار می‌گیرند.</div>'}
+  else lessons.forEach(item=>{const card=document.createElement("article");card.className="lesson";const h=document.createElement("h3");h.textContent=item.title||"آموزش بدون عنوان";const p=document.createElement("p");p.textContent=item.description||"برای مشاهده جزئیات این آموزش با معلم خود هماهنگ کن.";const tag=document.createElement("span");tag.className="tag";tag.textContent="آموزش";card.append(h,p,tag);list.append(card)});
+  const {count:efforts}=await client.from("ka_effort_cards").select("id",{count:"exact",head:true}).eq("student_id",session.user.id);
+  const {count:certs}=await client.from("ka_certificates").select("id",{count:"exact",head:true}).eq("student_id",session.user.id);
+  document.getElementById("effortCount").textContent=efforts??0;
+  document.getElementById("certificateCount").textContent=certs??0;
+ }catch(e){document.body.classList.add("ready");say(e.message||"خطا در بارگذاری پنل دانش‌آموز.") }
+})();
+document.getElementById("logout").addEventListener("click",async()=>{if(window.supabase){const c=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);await c.auth.signOut()}location.replace("index.html")});
+</script></body></html>
