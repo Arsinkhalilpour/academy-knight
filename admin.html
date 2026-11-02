@@ -20,7 +20,8 @@
       location.replace("./index.html?auth=denied");
       return;
     }
-    window.kaSupabase=client;\n    document.body.classList.add("auth-ready");
+    window.kaSupabase=client;
+    document.body.classList.add("auth-ready");
   } catch(e) {
     location.replace("./index.html?auth=error");
   }
