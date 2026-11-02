@@ -101,7 +101,7 @@ document.getElementById("login").addEventListener("submit",async e=>{
    showStatus("حساب شما هنوز توسط مدیر تأیید نشده است.",true);
    return;
   }
-  const destinations={creator:"creator.html",admin:"admin.html",teacher:"teacher.html"};
+  const destinations={creator:"creator.html",admin:"admin.html",teacher:"teacher.html",student:"student.html"};
   if(!destinations[profile.role]){
    await client.auth.signOut();
    showStatus("این حساب اجازه ورود به پنل‌ها را ندارد.",true);
