@@ -19,7 +19,8 @@ label{display:block;font-size:11px;color:#c5cede;margin:13px 0 6px}input{width:1
 .status{display:none;margin-top:13px;padding:10px;border-radius:9px;background:#1d332b;color:#a9e4c8;font-size:11px;line-height:2}
 footer{text-align:center;color:#718097;font-size:10px;margin-top:20px}
 @media(max-width:480px){.card{padding:23px 18px}}
-</style></head>
+</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
 <body><main class="card">
 <header class="brand"><div class="mark">♞</div><h1>آکادمی شوالیه</h1><div class="sub">KNIGHT ACADEMY</div></header>
 <p class="intro">به آکادمی خوش آمدی! اگر حساب داری وارد شو؛ اگر نه، خیلی راحت ثبت‌نام کن.</p>
@@ -40,18 +41,71 @@ footer{text-align:center;color:#718097;font-size:10px;margin-top:20px}
 <footer>KNIGHT ACADEMY · آکادمی شوالیه</footer>
 </main>
 <script>
+const SUPABASE_URL="https://rdsermutogewhcdsyoon.supabase.co";
+const SUPABASE_KEY="sb_publishable_kybJ2B3BKoT2fScPaz6xRQ_eBOSwiqi";
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const statusBox=document.getElementById("status");
+function showStatus(message,isError=false){
+ statusBox.style.display="block";
+ statusBox.style.background=isError?"#3a2025":"#1d332b";
+ statusBox.style.color=isError?"#ffc1c7":"#a9e4c8";
+ statusBox.textContent=message;
+}
+function friendlyError(error){
+ const message=(error && error.message)||"خطای نامشخص";
+ if(message.toLowerCase().includes("invalid login")) return "ایمیل یا رمز عبور اشتباه است.";
+ if(message.toLowerCase().includes("email not confirmed")) return "ابتدا ایمیل خود را تأیید کن.";
+ if(message.toLowerCase().includes("already registered")) return "این ایمیل قبلاً ثبت‌نام کرده است؛ وارد حساب شو.";
+ return message;
+}
 document.querySelectorAll(".tab").forEach(tab=>tab.addEventListener("click",()=>{
  document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===tab));
  document.querySelectorAll(".form").forEach(x=>x.classList.toggle("active",x.id===tab.dataset.form));
  statusBox.style.display="none";
 }));
-document.getElementById("login").addEventListener("submit",e=>{
- e.preventDefault();statusBox.style.display="block";
- statusBox.textContent="فرم ورود آماده است؛ برای ورود واقعی و انتقال خودکار به پنل مخصوص هر نقش، باید احراز هویت Supabase را وصل کنیم. فعلاً اطلاعات ارسال یا ذخیره نمی‌شود.";
+document.getElementById("login").addEventListener("submit",async e=>{
+ e.preventDefault();
+ const button=e.currentTarget.querySelector("button[type=submit]");
+ button.disabled=true;button.textContent="در حال ورود...";
+ try{
+  const email=document.getElementById("loginEmail").value.trim();
+  const password=document.getElementById("loginPassword").value;
+  const {data,error}=await supabase.auth.signInWithPassword({email,password});
+  if(error) throw error;
+  const {data:profile,error:profileError}=await supabase.from("ka_profiles").select("role,approved").eq("id",data.user.id).single();
+  if(profileError) throw new Error("ورود انجام شد، اما اطلاعات نقش حساب خوانده نشد. مدیر باید دسترسی پروفایل را بررسی کند.");
+  if(!profile || profile.approved!==true){
+   await supabase.auth.signOut();
+   showStatus("حساب شما هنوز توسط مدیر تأیید نشده است.",true);
+   return;
+  }
+  const destinations={creator:"creator.html",admin:"admin.html",teacher:"teacher.html"};
+  if(!destinations[profile.role]){
+   await supabase.auth.signOut();
+   showStatus("دسترسی این حساب به پنل‌های آکادمی فعال نیست. فقط مدیر، معلم و سازنده می‌توانند وارد پنل شوند.",true);
+   return;
+  }
+  showStatus("ورود موفق بود؛ در حال انتقال به پنل...");
+  window.location.href=destinations[profile.role];
+ }catch(error){showStatus(friendlyError(error),true);}
+ finally{button.disabled=false;button.textContent="ورود به آکادمی";}
 });
-document.getElementById("signup").addEventListener("submit",e=>{
- e.preventDefault();statusBox.style.display="block";
- statusBox.textContent="فرم ثبت‌نام آماده است؛ ثبت واقعی حساب پس از اتصال Supabase فعال می‌شود. فعلاً اطلاعات ارسال یا ذخیره نمی‌شود.";
+document.getElementById("signup").addEventListener("submit",async e=>{
+ e.preventDefault();
+ const button=e.currentTarget.querySelector("button[type=submit]");
+ button.disabled=true;button.textContent="در حال ثبت‌نام...";
+ try{
+  const fullName=document.getElementById("fullName").value.trim();
+  const email=document.getElementById("signupEmail").value.trim();
+  const password=document.getElementById("signupPassword").value;
+  const {data,error}=await supabase.auth.signUp({email,password,options:{data:{full_name:fullName}}});
+  if(error) throw error;
+  if(data.session){
+   showStatus("ثبت‌نام انجام شد. حساب شما پس از تأیید مدیر امکان ورود به پنل را خواهد داشت.");
+  }else{
+   showStatus("ثبت‌نام اولیه انجام شد. اگر تأیید ایمیل فعال است، ایمیل خود را بررسی کن؛ سپس منتظر تأیید مدیر بمان.");
+  }
+ }catch(error){showStatus(friendlyError(error),true);}
+ finally{button.disabled=false;button.textContent="ساخت حساب و ثبت‌نام";}
 });
 </script></body></html>
