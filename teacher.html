@@ -5,6 +5,7 @@
   <div class="field"><label for="newLessonTitle">عنوان درس جدید</label><input id="newLessonTitle" maxlength="150" placeholder="مثلاً: ریاضی پنجم - فصل اول"></div>
   <button class="action" id="addLessonBtn" type="button">＋ ثبت درس جدید</button>
   <div class="status" id="lessonStatus" role="status"></div>
+  <div class="field"><label>درس‌های ثبت‌شده توسط من</label><div id="myLessons" class="muted">در حال دریافت درس‌ها...</div></div>
   <div class="field"><label for="fileTitle">عنوان محتوا</label><input id="fileTitle" maxlength="120" placeholder="مثلاً: تمرین فصل اول ریاضی"></div>
   <div class="field"><label for="lessonSelect">درس مربوط</label><select id="lessonSelect"><option value="">در حال دریافت درس‌ها...</option></select></div>
   <div class="field"><label for="academyFile">انتخاب فایل (حداکثر 20 مگابایت)</label><input id="academyFile" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.mp4,.ppt,.pptx,.doc,.docx,.txt"></div>
@@ -25,6 +26,7 @@
   const lessonSelect=document.getElementById("lessonSelect");
   const addLessonBtn=document.getElementById("addLessonBtn");
   const lessonStatus=document.getElementById("lessonStatus");
+  const myLessons=document.getElementById("myLessons");
   const setLessonStatus=(message,isError=false)=>{lessonStatus.textContent=message;lessonStatus.style.color=isError?"#ff9b9b":"#e8bd5b";};
   const setStatus=(message,isError=false)=>{statusEl.textContent=message;statusEl.style.color=isError?"#ff9b9b":"#e8bd5b";};
   try {
@@ -40,15 +42,18 @@
     window.academyClient=client;
     document.body.classList.add("auth-ready");
 
-    const {data:lessons,error:lessonError}=await client.from("ka_lessons")
-      .select("id,title").order("created_at",{ascending:false});
+    let lessons=[];
+    const {data:lessonData,error:lessonError}=await client.from("ka_lessons")
+      .select("id,title,created_by").order("created_at",{ascending:false});
+    lessons=lessonData||[];
     if(lessonError) throw lessonError;
     lessonSelect.innerHTML='<option value="">یک درس انتخاب کن</option>';
     (lessons||[]).forEach(lesson=>{
       const option=document.createElement("option");
       option.value=lesson.id; option.textContent=lesson.title; lessonSelect.appendChild(option);
     });
-    if(!lessons || !lessons.length) lessonSelect.innerHTML='<option value="">ابتدا باید درسی ثبت شود</option>';
+    if(!lessons.length) lessonSelect.innerHTML='<option value="">ابتدا باید درسی ثبت شود</option>';
+    renderMyLessons();
     addLessonBtn.addEventListener("click",async()=>{
       const title=document.getElementById("newLessonTitle").value.trim();
       if(!title){setLessonStatus("عنوان درس را وارد کن.",true);return;}
@@ -58,16 +63,39 @@
         if(createError) throw createError;
         const option=document.createElement("option");option.value=created.id;option.textContent=created.title;lessonSelect.insertBefore(option,lessonSelect.options[1]||null);lessonSelect.value=created.id;
         document.getElementById("newLessonTitle").value="";
-        lessons.unshift(created);
+        lessons.unshift({...created,created_by:session.user.id});
+        renderMyLessons();
         setLessonStatus("درس با موفقیت ثبت شد؛ حالا می‌توانی فایلش را بارگذاری کنی. ✅");
       }catch(err){setLessonStatus("ثبت درس انجام نشد: "+(err.message||"خطای نامشخص"),true);}
       finally{addLessonBtn.disabled=false;}
     });
-    await loadFiles(lessons||[]);
+    await loadFiles(lessons);
+
+    function renderMyLessons(){
+      const mine=lessons.filter(x=>x.created_by===session.user.id);
+      myLessons.innerHTML="";
+      if(!mine.length){myLessons.textContent="هنوز درسی توسط شما ثبت نشده است.";return;}
+      mine.forEach(lesson=>{
+        const line=document.createElement("div");line.style.cssText="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)";
+        const name=document.createElement("span");name.textContent=lesson.title;
+        const del=document.createElement("button");del.type="button";del.className="action";del.textContent="حذف درس";del.style.cssText="background:#8f3942;color:white;padding:7px 11px";
+        del.addEventListener("click",async()=>{
+          if(!confirm("درس «"+lesson.title+"» حذف شود؟ ابتدا باید فایل‌های مرتبط با این درس را حذف کنی."))return;
+          del.disabled=true;
+          const {error}=await client.from("ka_lessons").delete().eq("id",lesson.id).eq("created_by",session.user.id);
+          if(error){setLessonStatus("حذف درس انجام نشد؛ ممکن است هنوز فایل مرتبط داشته باشد: "+error.message,true);del.disabled=false;return;}
+          lessons=lessons.filter(x=>x.id!==lesson.id);
+          const opt=lessonSelect.querySelector('option[value="'+lesson.id+'"]');if(opt)opt.remove();
+          if(!lessonSelect.value && !lessons.length)lessonSelect.innerHTML='<option value="">ابتدا باید درسی ثبت شود</option>';
+          renderMyLessons();setLessonStatus("درس حذف شد.");
+        });
+        line.append(name,del);myLessons.appendChild(line);
+      });
+    }
 
     async function loadFiles(lessonList){
       const {data:files,error}=await client.from("ka_academy_files")
-        .select("id,lesson_id,file_name,file_path,created_at")
+        .select("id,lesson_id,file_name,file_path,created_at,uploaded_by")
         .order("created_at",{ascending:false});
       if(error) throw error;
       const names=new Map(lessonList.map(x=>[x.id,x.title]));
@@ -89,7 +117,22 @@
           if(error){setStatus("دریافت لینک فایل ناموفق بود: "+error.message,true);return;}
           window.open(data.signedUrl,"_blank","noopener");
         });
-        action.appendChild(link); tr.append(title,lesson,kind,action); fileRows.appendChild(tr);
+        action.appendChild(link);
+        if(file.uploaded_by===session.user.id){
+          const del=document.createElement("button");del.type="button";del.className="action";del.textContent="حذف";del.style.cssText="background:#8f3942;color:white;padding:6px 10px;margin-right:8px";
+          del.addEventListener("click",async()=>{
+            if(!confirm("فایل «"+file.file_name+"» حذف شود؟"))return;
+            del.disabled=true;
+            const {error:rowError}=await client.from("ka_academy_files").delete().eq("id",file.id).eq("uploaded_by",session.user.id);
+            if(rowError){setStatus("حذف فایل انجام نشد: "+rowError.message,true);del.disabled=false;return;}
+            const {error:storageError}=await client.storage.from(BUCKET).remove([file.file_path]);
+            if(storageError)setStatus("اطلاعات فایل حذف شد، اما پاک‌کردن فایل ذخیره‌شده ناموفق بود: "+storageError.message,true);
+            else setStatus("فایل حذف شد.");
+            await loadFiles(lessons);
+          });
+          action.appendChild(del);
+        }
+        tr.append(title,lesson,kind,action); fileRows.appendChild(tr);
       });
     }
 
