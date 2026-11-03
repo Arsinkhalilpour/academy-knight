@@ -2,42 +2,49 @@
 // Required Edge Function secrets: GEMINI_API_KEY, SUPABASE_URL, SUPABASE_ANON_KEY
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+const allowedOrigin = "https://arsinkhalilpour.github.io";
+function makeCorsHeaders(origin: string | null) {
+  return {
+    "Access-Control-Allow-Origin": origin === allowedOrigin ? origin : allowedOrigin,
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Vary": "Origin",
+  };
+}
 
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-  if (req.method !== "POST") return Response.json({ error: "روش درخواست معتبر نیست." }, { status: 405, headers: corsHeaders });
+  const origin = req.headers.get("origin");
+  const cors = makeCorsHeaders(origin);
+  if (origin && origin !== allowedOrigin) return Response.json({ error: "مبدأ درخواست مجاز نیست." }, { status: 403, headers: cors });
+  if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
+  if (req.method !== "POST") return Response.json({ error: "روش درخواست معتبر نیست." }, { status: 405, headers: cors });
 
   try {
     const authorization = req.headers.get("Authorization");
-    if (!authorization) return Response.json({ error: "ابتدا وارد حساب شو." }, { status: 401, headers: corsHeaders });
+    if (!authorization) return Response.json({ error: "ابتدا وارد حساب شو." }, { status: 401, headers: cors });
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const geminiKey = Deno.env.get("GEMINI_API_KEY");
-    if (!geminiKey) return Response.json({ error: "کلید امن هوش مصنوعی هنوز در سرور تنظیم نشده است." }, { status: 503, headers: corsHeaders });
+    if (!geminiKey) return Response.json({ error: "کلید امن هوش مصنوعی هنوز در سرور تنظیم نشده است." }, { status: 503, headers: cors });
 
     const supabase = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authorization } },
       auth: { persistSession: false },
     });
     const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) return Response.json({ error: "نشست معتبر نیست؛ دوباره وارد شو." }, { status: 401, headers: corsHeaders });
+    if (userError || !user) return Response.json({ error: "نشست معتبر نیست؛ دوباره وارد شو." }, { status: 401, headers: cors });
 
     const { data: profile, error: profileError } = await supabase
       .from("ka_profiles").select("role,approved").eq("id", user.id).single();
     if (profileError || profile?.role !== "student" || profile?.approved !== true) {
-      return Response.json({ error: "دسترسی دانش‌آموز تأییدشده لازم است." }, { status: 403, headers: corsHeaders });
+      return Response.json({ error: "دسترسی دانش‌آموز تأییدشده لازم است." }, { status: 403, headers: cors });
     }
 
     const body = await req.json();
     const question = String(body.question ?? "").trim();
     if (!question || question.length > 1500) {
-      return Response.json({ error: "سؤال باید بین ۱ تا ۱۵۰۰ نویسه باشد." }, { status: 400, headers: corsHeaders });
+      return Response.json({ error: "سؤال باید بین ۱ تا ۱۵۰۰ نویسه باشد." }, { status: 400, headers: cors });
     }
 
     const prompt = "تو معلم مهربان و دقیق آکادمی شوالیه برای دانش‌آموز پایه پنجم دبستان ایران هستی. فارسی ساده و مناسب سن پاسخ بده. مرحله‌به‌مرحله راهنمایی کن، جواب تکلیف را بی‌توضیح تحویل نده و دانش‌آموز را به فکر کردن تشویق کن. اگر سؤال خارج از آموزش مدرسه بود، کوتاه و امن پاسخ بده و به درس برگردان. پرسش دانش‌آموز: " + question;
@@ -49,13 +56,13 @@ Deno.serve(async (req: Request) => {
     const result = await geminiResponse.json();
     if (!geminiResponse.ok) {
       console.error("Gemini error", result);
-      return Response.json({ error: "فعلاً معلم هوشمند پاسخ نمی‌دهد. کمی بعد دوباره امتحان کن." }, { status: 502, headers: corsHeaders });
+      return Response.json({ error: "فعلاً معلم هوشمند پاسخ نمی‌دهد. کمی بعد دوباره امتحان کن." }, { status: 502, headers: cors });
     }
     const answer = result.candidates?.[0]?.content?.parts?.map((p: {text?: string}) => p.text ?? "").join("").trim();
-    if (!answer) return Response.json({ error: "پاسخی دریافت نشد؛ دوباره تلاش کن." }, { status: 502, headers: corsHeaders });
-    return Response.json({ answer }, { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if (!answer) return Response.json({ error: "پاسخی دریافت نشد؛ دوباره تلاش کن." }, { status: 502, headers: cors });
+    return Response.json({ answer }, { headers: { ...cors, "Content-Type": "application/json" } });
   } catch (error) {
     console.error(error);
-    return Response.json({ error: "خطای موقت در معلم هوشمند." }, { status: 500, headers: corsHeaders });
+    return Response.json({ error: "خطای موقت در معلم هوشمند." }, { status: 500, headers: cors });
   }
 });
