@@ -15,11 +15,11 @@
 <div class="box" style="margin:0 0 20px">
   <div class="section-title" style="margin:0 0 12px"><div><h2>پیش‌نمایش پنل‌ها</h2><p>هر پنل را در زبانه‌ای جداگانه باز کن و ظاهر و امکاناتش را بررسی کن.</p></div></div>
   <div class="actions">
-    <a class="btn gold" href="./student.html" target="_blank" rel="noopener noreferrer" style="text-decoration:none">♙ دیدن پنل دانش‌آموز</a>
-    <a class="btn" href="./teacher.html" target="_blank" rel="noopener noreferrer" style="text-decoration:none">♟ دیدن پنل معلم</a>
-    <a class="btn" href="./admin.html" target="_blank" rel="noopener noreferrer" style="text-decoration:none">♛ دیدن پنل مدیر</a>
+    <a class="btn gold" href="./preview.html?view=student" target="_blank" rel="noopener noreferrer" style="text-decoration:none">♙ دیدن پنل دانش‌آموز</a>
+    <a class="btn" href="./preview.html?view=teacher" target="_blank" rel="noopener noreferrer" style="text-decoration:none">♟ دیدن پنل معلم</a>
+    <a class="btn" href="./preview.html?view=admin" target="_blank" rel="noopener noreferrer" style="text-decoration:none">♛ دیدن پنل مدیر</a>
   </div>
-  <p class="help">برای مشاهده هر پنل باید با حسابی وارد شوی که نقش و مجوز همان پنل را دارد.</p>
+  <p class="help">این پیش‌نمایش فقط‌خواندنی است؛ با همان حساب Creator می‌توانی هر سه پنل را ببینی، بدون ورود به حساب معلم، مدیر یا دانش‌آموز.</p>
 </div>
 <section id="overview" class="section active"><div class="cards"><div class="card"><small>دانش‌آموزان</small><strong id="creatorStudentCount">—</strong></div><div class="card"><small>معلمان</small><strong id="creatorTeacherCount">—</strong></div><div class="card"><small>درخواست‌های تأیید</small><strong id="creatorPendingCount">—</strong></div><div class="card"><small>محتوای آموزشی</small><strong id="creatorLessonCount">—</strong></div></div><div class="section-title"><div><h2>میانبرهای مدیریت</h2><p>انتخاب بخش برای ادامه کار</p></div></div><div class="box actions"><button class="btn" data-jump="students">مدیریت دانش‌آموزان</button><button class="btn" data-jump="teachers">مدیریت معلمان</button><button class="btn" data-jump="content">افزودن محتوای درسی</button><button class="btn" data-jump="rewards">سیستم پاداش</button></div></section>
 <section id="students" class="section"><div class="section-title"><div><h2>مدیریت دانش‌آموزان</h2><p>بررسی و تأیید درخواست‌های عضویت</p></div><button class="btn gold" id="refreshPending">به‌روزرسانی فهرست</button></div><div class="box table-wrap"><table class="table"><thead><tr><th>نام</th><th>ایمیل</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody id="pendingUsers"><tr><td colspan="4" class="empty">برای دریافت درخواست‌ها روی «به‌روزرسانی فهرست» بزن.</td></tr></tbody></table></div><p class="help">درخواست‌های ثبت‌نام تأییدنشده اینجا نمایش داده می‌شوند. نقش پیش‌فرض کاربران پس از ثبت‌نام دانش‌آموز است.</p></section>
