@@ -143,8 +143,8 @@
       if(!file || !title || !lessonId){setStatus("عنوان، درس و فایل را کامل انتخاب کن.",true);return;}
       if(file.size>20*1024*1024){setStatus("حجم فایل بیشتر از ۲۰ مگابایت است.",true);return;}
       uploadBtn.disabled=true; setStatus("در حال بارگذاری فایل...");
-      const safeName=file.name.replace(/[^\p{L}\p{N}._-]/gu,"_");
-      const path=session.user.id+"/"+crypto.randomUUID()+"-"+safeName;
+      const extension=(file.name.split(".").pop()||"").toLowerCase().replace(/[^a-z0-9]/g,"");
+      const path=session.user.id+"/"+crypto.randomUUID()+(extension?"."+extension:"");
       try{
         const {error:storageError}=await client.storage.from(BUCKET).upload(path,file,{ upsert:false, contentType:file.type||"application/octet-stream"});
         if(storageError) throw storageError;
