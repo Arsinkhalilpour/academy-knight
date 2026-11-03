@@ -21,11 +21,11 @@
   </div>
   <p class="help">برای مشاهده هر پنل باید با حسابی وارد شوی که نقش و مجوز همان پنل را دارد.</p>
 </div>
-<section id="overview" class="section active"><div class="cards"><div class="card"><small>دانش‌آموزان</small><strong>۰</strong></div><div class="card"><small>معلمان</small><strong>۰</strong></div><div class="card"><small>درخواست‌های تأیید</small><strong>۰</strong></div><div class="card"><small>محتوای آموزشی</small><strong>۰</strong></div></div><div class="section-title"><div><h2>میانبرهای مدیریت</h2><p>انتخاب بخش برای ادامه کار</p></div></div><div class="box actions"><button class="btn" data-jump="students">مدیریت دانش‌آموزان</button><button class="btn" data-jump="teachers">مدیریت معلمان</button><button class="btn" data-jump="content">افزودن محتوای درسی</button><button class="btn" data-jump="rewards">سیستم پاداش</button></div></section>
+<section id="overview" class="section active"><div class="cards"><div class="card"><small>دانش‌آموزان</small><strong id="creatorStudentCount">—</strong></div><div class="card"><small>معلمان</small><strong id="creatorTeacherCount">—</strong></div><div class="card"><small>درخواست‌های تأیید</small><strong id="creatorPendingCount">—</strong></div><div class="card"><small>محتوای آموزشی</small><strong id="creatorLessonCount">—</strong></div></div><div class="section-title"><div><h2>میانبرهای مدیریت</h2><p>انتخاب بخش برای ادامه کار</p></div></div><div class="box actions"><button class="btn" data-jump="students">مدیریت دانش‌آموزان</button><button class="btn" data-jump="teachers">مدیریت معلمان</button><button class="btn" data-jump="content">افزودن محتوای درسی</button><button class="btn" data-jump="rewards">سیستم پاداش</button></div></section>
 <section id="students" class="section"><div class="section-title"><div><h2>مدیریت دانش‌آموزان</h2><p>بررسی و تأیید درخواست‌های عضویت</p></div><button class="btn gold" id="refreshPending">به‌روزرسانی فهرست</button></div><div class="box table-wrap"><table class="table"><thead><tr><th>نام</th><th>ایمیل</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody id="pendingUsers"><tr><td colspan="4" class="empty">برای دریافت درخواست‌ها روی «به‌روزرسانی فهرست» بزن.</td></tr></tbody></table></div><p class="help">درخواست‌های ثبت‌نام تأییدنشده اینجا نمایش داده می‌شوند. نقش پیش‌فرض کاربران پس از ثبت‌نام دانش‌آموز است.</p></section>
-<section id="teachers" class="section"><div class="section-title"><div><h2>مدیریت معلمان</h2><p>ایجاد و مدیریت دسترسی معلمان</p></div></div><div class="box"><div class="formgrid"><label><span class="field-label">نام معلم</span><input class="field" placeholder="نام و نام خانوادگی" disabled></label><label><span class="field-label">ایمیل معلم</span><input class="field" placeholder="teacher@example.com" disabled></label></div><button class="btn gold" disabled>افزودن معلم — در مرحله اتصال فعال می‌شود</button><p class="help">فعلاً هیچ حسابی ساخته نمی‌شود. مدیریت نقش‌ها باید از مسیر امن سمت سرور انجام شود.</p></div></section>
+<section id="teachers" class="section"><div class="section-title"><div><h2>مدیریت معلمان</h2><p>دعوت امن معلم با ایمیل؛ رمز عبور را خود معلم تعیین می‌کند.</p></div></div><div class="box"><form id="createTeacherForm"><div class="formgrid"><label><span class="field-label">نام و نام خانوادگی معلم</span><input class="field" id="teacherFullName" required maxlength="100" placeholder="نام معلم"></label><label><span class="field-label">ایمیل معلم</span><input class="field" id="teacherEmail" type="email" required maxlength="254" placeholder="teacher@example.com"></label></div><button class="btn gold" id="createTeacherBtn" type="submit">ارسال دعوت‌نامه و ساخت حساب معلم</button></form><p class="help" id="teacherCreateStatus">پس از ارسال دعوت‌نامه، معلم از طریق ایمیل لینک ورود را دریافت می‌کند. کلید محرمانه فقط در تنظیمات سرور نگهداری می‌شود.</p></div></section>
 <section id="managers" class="section"><div class="section-title"><div><h2>مدیریت مدیران</h2><p>افزودن مدیر و کنترل دسترسی‌های مدیریتی</p></div><span class="tag">ویژه Creator</span></div><div class="notice">فقط حساب Creator اجازه تعیین یا لغو نقش مدیر را دارد. مدیران نمی‌توانند نقش Creator ایجاد کنند یا تغییر دهند.</div><div class="notice">از فهرست کاربران تأییدشده، نقش هر کاربر را انتخاب و ذخیره کن. نقش Creator قابل واگذاری یا تغییر نیست.</div><div class="section-title"><div><h2>فهرست کاربران تأییدشده</h2><p>تغییر نقش دانش‌آموز، معلم و مدیر</p></div><button class="btn gold" id="refreshRoles">به‌روزرسانی کاربران</button></div><div class="box table-wrap"><table class="table"><thead><tr><th>نام</th><th>ایمیل</th><th>نقش فعلی</th><th>نقش جدید</th><th>عملیات</th></tr></thead><tbody id="approvedUsers"><tr><td colspan="5" class="empty">برای دریافت کاربران روی دکمه بالا بزن.</td></tr></tbody></table></div></section>
-<section id="content" class="section"><div class="section-title"><div><h2>درس‌ها و محتوای آموزشی</h2><p>ساختار دروس پایه پنجم</p></div></div><div class="box"><div class="formgrid"><label><span class="field-label">عنوان درس</span><input class="field" placeholder="مثلاً کسرها" disabled></label><label><span class="field-label">موضوع درسی</span><select class="field" disabled><option>انتخاب درس</option><option>ریاضی</option><option>فارسی</option><option>مطالعات اجتماعی</option><option>قرآن</option><option>هدیه‌های آسمانی</option></select></label></div><label><span class="field-label">توضیحات</span><textarea class="field" rows="3" placeholder="توضیح کوتاه درباره درس" disabled></textarea></label><button class="btn gold" disabled>ثبت درس — در مرحله اتصال فعال می‌شود</button></div></section>
+<section id="content" class="section"><div class="section-title"><div><h2>درس‌ها و محتوای آموزشی</h2><p>ثبت درس به‌صورت پیش‌نویس یا انتشار مستقیم</p></div></div><div class="box"><form id="creatorLessonForm"><label><span class="field-label">عنوان درس</span><input class="field" id="creatorLessonTitle" maxlength="150" required placeholder="مثلاً کسرها"></label><label><span class="field-label">توضیحات درس</span><textarea class="field" id="creatorLessonDescription" rows="3" maxlength="2000" placeholder="توضیح کوتاه درباره درس"></textarea></label><label><span class="field-label">وضعیت</span><select class="field" id="creatorLessonPublished"><option value="false">پیش‌نویس؛ فعلاً برای دانش‌آموز نمایش داده نشود</option><option value="true">انتشار برای دانش‌آموزان</option></select></label><button class="btn gold" id="creatorLessonBtn" type="submit">ثبت درس</button></form><p class="help" id="creatorLessonStatus">درس‌ها در جدول آموزش‌ها ثبت می‌شوند. معلم نیز می‌تواند فایل‌های مرتبط را در پنل خودش بارگذاری کند.</p></div></section>
 <section id="rewards" class="section"><div class="section-title"><div><h2>کارت‌های تلاش و لوح تقدیر</h2><p>قانون پاداش آکادمی</p></div></div><div class="cards"><div class="card"><small>هر ۱۰ کارت تلاش معلم</small><strong>۱ لوح</strong></div><div class="card"><small>هر ۱ کارت تلاش مدیر</small><strong>۱ لوح</strong></div></div><div class="box" style="margin-top:13px"><p class="help">شمارش کارت‌ها و صدور خودکار لوح‌ها پس از اتصال به پایگاه داده فعال می‌شود. این صفحه فعلاً فقط قوانین را نمایش می‌دهد.</p></div></section>
 <section id="settings" class="section"><div class="section-title"><div><h2>تنظیمات آکادمی</h2><p>اطلاعات پایه پروژه</p></div></div><div class="box"><p class="help">نام: آکادمی شوالیه<br>پایه: پنجم دبستان ایران<br>زبان: فارسی — راست‌چین<br>پوسته: سرمه‌ای، مشکی و طلایی<br>نقش مالک: Creator</p></div></section>
 <footer class="help" style="text-align:center;padding:25px 0">KNIGHT ACADEMY · پنل مدیریت مالک</footer></main></div>
@@ -40,7 +40,7 @@ async function loadApprovedUsers(){
  const body=document.getElementById("approvedUsers");
  if(!body || !window.kaSupabase)return;
  body.innerHTML='<tr><td colspan="5" class="empty">در حال دریافت کاربران...</td></tr>';
- const {data,error}=await window.kaSupabase.rpc("ka_creator_list_users");
+ const {data,error}=await window.kaSupabase.rpc("ka_creator_list_users_v2");
  if(error){body.innerHTML='<tr><td colspan="5" class="empty">خطا: '+error.message+'</td></tr>';return;}
  if(!data || !data.length){body.innerHTML='<tr><td colspan="5" class="empty">کاربر تأییدشده‌ای پیدا نشد.</td></tr>';return;}
  body.innerHTML="";
@@ -58,7 +58,7 @@ async function loadApprovedUsers(){
   if(user.role==="creator"){select.disabled=true;save.disabled=true;current.textContent="Creator (محافظت‌شده)";}
   save.onclick=async()=>{
    save.disabled=true;save.textContent="در حال ذخیره...";
-   const {error}=await window.kaSupabase.rpc("ka_creator_set_role",{target_id:user.user_id,new_role:select.value});
+   const {error}=await window.kaSupabase.rpc("ka_creator_set_user_role",{target_id:user.user_id,new_role:select.value});
    if(error){alert("تغییر نقش انجام نشد: "+error.message);save.disabled=false;save.textContent="ذخیره";return;}
    await loadApprovedUsers();
   };
@@ -71,7 +71,7 @@ async function loadPendingUsers(){
  const body=document.getElementById("pendingUsers");
  if(!body || !window.kaSupabase) return;
  body.innerHTML='<tr><td colspan="4" class="empty">در حال دریافت درخواست‌ها...</td></tr>';
- const {data,error}=await window.kaSupabase.rpc("ka_creator_pending_users");
+ const {data,error}=await window.kaSupabase.rpc("ka_creator_list_pending_users_v2");
  if(error){body.innerHTML='<tr><td colspan="4" class="empty">خطا در دریافت: '+error.message+'</td></tr>';return;}
  if(!data || !data.length){body.innerHTML='<tr><td colspan="4" class="empty">درخواست تأییدنشده‌ای وجود ندارد.</td></tr>';return;}
  body.innerHTML="";
@@ -83,8 +83,7 @@ async function loadPendingUsers(){
   const actions=document.createElement("td");actions.className="actions";
   const approve=document.createElement("button");approve.className="btn gold";approve.textContent="تأیید";
   const reject=document.createElement("button");reject.className="btn";reject.textContent="رد";
-  approve.onclick=()=>reviewUser(user.user_id,"ka_creator_approve_user",tr);
-  reject.onclick=()=>reviewUser(user.user_id,"ka_creator_reject_user",tr);
+  approve.onclick=()=>reviewUser(user.user_id,"ka_creator_approve_signup",tr);
   actions.append(approve,reject);tr.append(name,email,status,actions);body.append(tr);
  });
 }
@@ -96,6 +95,57 @@ async function reviewUser(id,fn,row){
 }
 document.getElementById("refreshPending")?.addEventListener("click",loadPendingUsers);
 document.getElementById("refreshRoles")?.addEventListener("click",loadApprovedUsers);
+
+async function loadCreatorStats(){
+ const [usersRes,pendingRes,lessonRes]=await Promise.all([
+  window.kaSupabase.rpc("ka_creator_list_users_v2"),
+  window.kaSupabase.rpc("ka_creator_list_pending_users_v2"),
+  window.kaSupabase.from("ka_lessons").select("id",{count:"exact",head:true})
+ ]);
+ if(usersRes.error||pendingRes.error||lessonRes.error)return;
+ const users=usersRes.data||[];
+ document.getElementById("creatorStudentCount").textContent=users.filter(x=>x.role==="student").length;
+ document.getElementById("creatorTeacherCount").textContent=users.filter(x=>x.role==="teacher").length;
+ document.getElementById("creatorPendingCount").textContent=(pendingRes.data||[]).length;
+ document.getElementById("creatorLessonCount").textContent=lessonRes.count??0;
+}
+
+document.getElementById("createTeacherForm")?.addEventListener("submit",async event=>{
+ event.preventDefault();
+ const button=document.getElementById("createTeacherBtn");
+ const status=document.getElementById("teacherCreateStatus");
+ const full_name=document.getElementById("teacherFullName").value.trim();
+ const email=document.getElementById("teacherEmail").value.trim();
+ button.disabled=true;status.textContent="در حال ارسال دعوت‌نامه...";
+ try{
+  const {data,error}=await window.kaSupabase.functions.invoke("create-teacher",{body:{full_name,email}});
+  if(error)throw error;
+  if(data?.error)throw new Error(data.error);
+  status.textContent=data?.message||"دعوت‌نامه با موفقیت ارسال شد.";
+  event.currentTarget.reset();
+  await loadApprovedUsers();await loadCreatorStats();
+ }catch(error){status.textContent="ساخت حساب انجام نشد: "+(error.message||"تابع سرور نصب نشده یا تنظیماتش کامل نیست.");}
+ finally{button.disabled=false;}
+});
+
+document.getElementById("creatorLessonForm")?.addEventListener("submit",async event=>{
+ event.preventDefault();
+ const button=document.getElementById("creatorLessonBtn");
+ const status=document.getElementById("creatorLessonStatus");
+ const title=document.getElementById("creatorLessonTitle").value.trim();
+ const description=document.getElementById("creatorLessonDescription").value.trim();
+ const published=document.getElementById("creatorLessonPublished").value==="true";
+ button.disabled=true;status.textContent="در حال ثبت درس...";
+ try{
+  const {data,error}=await window.kaSupabase.rpc("ka_creator_create_lesson",{
+   lesson_title:title,lesson_description:description,make_published:published
+  });
+  if(error)throw error;
+  status.textContent="درس با موفقیت ثبت شد.";
+  event.currentTarget.reset();await loadCreatorStats();
+ }catch(error){status.textContent="ثبت درس انجام نشد: "+(error.message||"خطای نامشخص");}
+ finally{button.disabled=false;}
+});
 
 </script>
 <style>body{visibility:hidden}body.auth-ready{visibility:visible}</style>
@@ -118,6 +168,9 @@ document.getElementById("refreshRoles")?.addEventListener("click",loadApprovedUs
       return;
     }
     document.body.classList.add("auth-ready");
+    await loadCreatorStats();
+    await loadPendingUsers();
+    await loadApprovedUsers();
   } catch(e) {
     location.replace("./index.html?auth=error");
   }
