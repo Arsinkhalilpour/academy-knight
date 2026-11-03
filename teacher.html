@@ -33,14 +33,14 @@
     const {data:{session},error:sessionError}=await client.auth.getSession();
     if(sessionError || !session){location.replace("./index.html?auth=required");return;}
     const {data:profile,error}=await client.from("ka_profiles")
-      .select("role,approved,full_name").eq("id",session.user.id).single();
+      .select("role,approved").eq("id",session.user.id).single();
     if(error || !profile || profile.approved!==true || profile.role!=="teacher"){
       await client.auth.signOut();
       location.replace("./index.html?auth=denied");
       return;
     }
     // اگر نام و نام خانوادگی در پروفایل ثبت نشده باشد، پیش از ورود به پنل دریافت می‌شود.
-    if(!String(profile.full_name||"").trim()){
+    if(!String(session.user.user_metadata?.full_name||"").trim()){
       const gate=document.createElement("div");
       gate.id="teacherNameGate";
       gate.style.cssText="position:fixed;inset:0;z-index:9999;background:#050914ee;display:grid;place-items:center;padding:20px";
@@ -58,9 +58,6 @@
         }
         saveName.disabled=true;nameStatus.textContent="در حال ذخیره اطلاعات...";
         try{
-          const {error:profileUpdateError}=await client.from("ka_profiles")
-            .update({full_name:fullName}).eq("id",session.user.id);
-          if(profileUpdateError) throw profileUpdateError;
           const {error:authUpdateError}=await client.auth.updateUser({data:{full_name:fullName}});
           if(authUpdateError) throw authUpdateError;
           gate.remove();
