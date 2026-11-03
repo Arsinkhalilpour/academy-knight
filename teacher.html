@@ -35,8 +35,15 @@
     const {data:profile,error}=await client.from("ka_profiles")
       .select("role,approved").eq("id",session.user.id).single();
     if(error || !profile || profile.approved!==true || profile.role!=="teacher"){
-      await client.auth.signOut();
-      location.replace("./index.html?auth=denied");
+      document.body.classList.add("auth-ready");
+      const notice=document.getElementById("notice");
+      notice.style.cssText="margin:20px 0;padding:18px;border:1px solid #a65b5b;background:#321d25;color:#ffd5d5;border-radius:12px;font-size:13px;line-height:2";
+      const details=error
+        ? "خطای خواندن پروفایل: "+error.message
+        : !profile
+          ? "برای این حساب در جدول ka_profiles پروفایلی پیدا نشد."
+          : "نقش ثبت‌شده: "+String(profile.role)+" | وضعیت تأیید: "+String(profile.approved)+". نقش باید teacher و وضعیت تأیید true باشد.";
+      notice.textContent="ورود انجام شده، اما دسترسی پنل معلم تأیید نشد. "+details+"\nلطفاً از این پیام عکس بگیر و برای مدیر سایت بفرست. حساب از سایت خارج نشده است.";
       return;
     }
     // اگر نام و نام خانوادگی در پروفایل ثبت نشده باشد، پیش از ورود به پنل دریافت می‌شود.
