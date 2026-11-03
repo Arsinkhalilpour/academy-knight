@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090d18">
+<title>پیش‌نمایش پنل‌ها | آکادمی شوالیه</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#080d17;--card:#111b2b;--line:#2a3951;--gold:#e7bd5b;--txt:#f4f6fa;--muted:#9eabc0;--green:#59c69a}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:Vazirmatn,Tahoma,sans-serif}.wrap{max-width:1100px;margin:auto;padding:22px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.top h1{font-size:22px;margin:0}.sub{color:var(--muted);font-size:12px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0}.tab,.btn{border:1px solid var(--line);border-radius:10px;background:#1b2a40;color:var(--txt);padding:10px 15px;font:inherit;cursor:pointer}.tab.active,.gold{background:var(--gold);color:#1a160d;border-color:var(--gold);font-weight:700}.banner{border:1px solid #66552f;background:#292316;color:#f2d99b;border-radius:12px;padding:13px 16px;font-size:12px;line-height:2;margin:15px 0}.panel{display:none}.panel.active{display:block}.head{padding:22px;border:1px solid var(--line);background:linear-gradient(120deg,#1b2c46,#111b2b);border-radius:16px;margin-bottom:14px}.head h2{margin:0 0 6px;font-size:19px}.head p{margin:0;color:#c0cad9;font-size:12px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.card,.box{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:16px}.card small,.muted{color:var(--muted);font-size:11px}.card strong{display:block;font-size:23px;margin-top:8px}.box{margin-top:13px}.box h3{margin:0 0 12px;font-size:14px}.item{padding:12px 0;border-bottom:1px solid var(--line);font-size:12px;display:flex;justify-content:space-between;gap:12px}.item:last-child{border:0}.tag{background:#24344a;color:#c6d5ea;border-radius:7px;padding:4px 8px;font-size:10px;white-space:nowrap}.fake{opacity:.82;cursor:not-allowed}.footer{color:var(--muted);font-size:10px;text-align:center;padding:28px}.hide{display:none!important}@media(max-width:600px){.wrap{padding:14px}.cards{grid-template-columns:1fr 1fr}.top h1{font-size:18px}}
+</style></head>
+<body>
+<div class="wrap">
+<header class="top"><div><div class="sub">KNIGHT ACADEMY · CREATOR VIEW</div><h1>پیش‌نمایش پنل‌های آکادمی</h1></div><a class="btn gold" href="./creator.html" style="text-decoration:none">بازگشت به پنل Creator</a></header>
+<div class="banner">این صفحه فقط برای مشاهدهٔ ظاهر پنل‌هاست. اطلاعات نمونه و نمایشی هستند؛ هیچ تغییری در حساب‌ها، درس‌ها یا پاداش‌های واقعی ایجاد نمی‌شود. دسترسی فقط پس از ورود Creator تأییدشده مجاز است.</div>
+<nav class="tabs"><button class="tab active" data-panel="student">♙ پنل دانش‌آموز</button><button class="tab" data-panel="teacher">♟ پنل معلم</button><button class="tab" data-panel="admin">♛ پنل مدیر</button></nav>
+<section id="student" class="panel active">
+<div class="head"><h2>سلام، دانش‌آموز شوالیه! 🌟</h2><p>به کلاس پنجم آکادمی خوش آمدی. امروز هم می‌توانی چیز تازه‌ای یاد بگیری.</p></div>
+<div class="cards"><div class="card"><small>کارت‌های تلاش</small><strong>۷</strong></div><div class="card"><small>لوح‌های تقدیر</small><strong>۰</strong></div><div class="card"><small>درس‌های منتشرشده</small><strong>۱۲</strong></div></div>
+<div class="box"><h3>آخرین آموزش‌ها</h3><div class="item"><span>ریاضی پنجم · کسرها</span><span class="tag">آموزش</span></div><div class="item"><span>فارسی پنجم · آرایه‌های ادبی</span><span class="tag">آموزش</span></div><div class="item"><span>علوم پنجم · ماده و تغییرات</span><span class="tag">آموزش</span></div></div>
+<div class="box"><h3>فایل‌های آموزشی</h3><div class="item"><span>جزوه فصل کسرها.pdf</span><span class="tag">نمونه فایل</span></div><div class="item"><span>تمرین علوم.docx</span><span class="tag">نمونه فایل</span></div></div>
+</section>
+<section id="teacher" class="panel">
+<div class="head"><h2>پنل معلم 🎓</h2><p>مدیریت آموزش‌ها، فایل‌ها و تشویق دانش‌آموزان</p></div>
+<div class="cards"><div class="card"><small>درس‌های من</small><strong>۸</strong></div><div class="card"><small>فایل‌های بارگذاری‌شده</small><strong>۱۵</strong></div><div class="card"><small>کارت‌های تلاش داده‌شده</small><strong>۲۴</strong></div></div>
+<div class="box"><h3>مدیریت درس‌ها</h3><div class="item"><span>ریاضی پنجم · فصل کسرها</span><span class="tag">منتشرشده</span></div><div class="item"><span>علوم · انرژی</span><span class="tag">پیش‌نویس</span></div><button class="btn fake" disabled>＋ ثبت درس جدید</button></div>
+<div class="box"><h3>تشویق دانش‌آموز</h3><div class="item"><span>انتخاب دانش‌آموز و ثبت کارت تلاش</span><span class="tag">نمایشی</span></div><button class="btn fake" disabled>ثبت یک کارت تلاش</button></div>
+</section>
+<section id="admin" class="panel">
+<div class="head"><h2>پنل مدیر 🛡️</h2><p>نظارت بر کاربران، محتوای آموزشی و فعالیت‌های آکادمی</p></div>
+<div class="cards"><div class="card"><small>دانش‌آموزان تأییدشده</small><strong>۳۲</strong></div><div class="card"><small>معلمان</small><strong>۴</strong></div><div class="card"><small>درس‌ها</small><strong>۲۱</strong></div></div>
+<div class="box"><h3>مدیریت دسترسی معلمان</h3><div class="item"><span>نمونه معلم اول</span><span class="tag">معلم</span></div><div class="item"><span>نمونه دانش‌آموز دوم</span><span class="tag">دانش‌آموز</span></div><button class="btn fake" disabled>ذخیره تغییر نقش</button></div>
+<div class="box"><h3>کارت تلاش مدیر</h3><div class="item"><span>انتخاب دانش‌آموز و ثبت کارت مدیر</span><span class="tag">نمایشی</span></div><button class="btn fake" disabled>ثبت کارت مدیر</button></div>
+</section>
+<div class="footer">KNIGHT ACADEMY · پیش‌نمایش فقط‌خواندنی برای Creator</div>
+</div>
+<script>
+(function(){
+ const tabs=[...document.querySelectorAll(".tab")],panels=[...document.querySelectorAll(".panel")];
+ tabs.forEach(tab=>tab.addEventListener("click",()=>{
+  tabs.forEach(x=>x.classList.toggle("active",x===tab));
+  panels.forEach(panel=>panel.classList.toggle("active",panel.id===tab.dataset.panel));
+ }));
+})();
+(async function(){
+ const URL="https://rdsermutogewhcdsyoon.supabase.co";
+ const KEY="sb_publishable_kybJ2B3BKoT2fScPaz6xRQ_eBOSwiqi";
+ try{
+  const client=window.supabase.createClient(URL,KEY);
+  const {data:{session},error:sessionError}=await client.auth.getSession();
+  if(sessionError||!session){location.replace("./index.html?auth=required");return;}
+  const {data:profile,error}=await client.from("ka_profiles").select("role,approved").eq("id",session.user.id).single();
+  if(error||!profile||profile.role!=="creator"||profile.approved!==true){location.replace("./index.html?auth=denied");return;}
+ }catch(e){location.replace("./index.html?auth=error");}
+})();
+</script></body></html>
