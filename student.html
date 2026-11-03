@@ -28,6 +28,7 @@ button{font:inherit;border:0;border-radius:9px;padding:9px 13px;cursor:pointer}.
 <div class="subject"><span>🌱</span><div>هدیه‌های آسمانی<small>درس‌های زندگی</small></div></div>
 </section>
 <h2 class="section-title">آخرین آموزش‌ها</h2><section class="lessons" id="lessons"><div class="empty">در حال دریافت آموزش‌ها...</div></section>
+<h2 class="section-title">فایل‌های آموزشی درس‌ها</h2><section class="lessons" id="lessonFiles"><div class="empty">در حال دریافت فایل‌ها...</div></section>
 <h2 class="section-title">معلم هوشمند آکادمی ✦</h2><section class="tutor"><b>از درس‌هایت هر سؤالی داری بپرس!</b><p>معلم هوشمند با زبان ساده راهنمایی‌ات می‌کند و کمک می‌کند خودت مسئله را یاد بگیری.</p><div id="chatlog" class="chatlog" aria-live="polite"><div class="bubble ai">سلام قهرمان! 😊 سؤال درسی‌ات را بنویس تا با هم حلش کنیم.</div></div><form id="askForm" class="askrow"><input id="question" maxlength="1500" placeholder="مثلاً کسرها را چطور جمع کنم؟" required><button id="askButton" type="submit">ارسال</button></form><div id="tutorStatus" class="muted" style="color:#e8c66f;margin-top:8px;font-size:11px"></div></section><h2 class="section-title">پیشرفت من</h2><section class="cards">
 <div class="stat"><b id="effortCount">۰</b><small>کارت تلاش دریافت‌شده</small></div>
 <div class="stat"><b id="certificateCount">۰</b><small>لوح تقدیر من</small></div>
@@ -45,18 +46,41 @@ const SUPABASE_KEY="sb_publishable_kybJ2B3BKoT2fScPaz6xRQ_eBOSwiqi";
   const {data:{session}}=await client.auth.getSession();
   if(!session){location.replace("index.html");return}
   const {data:profile,error}=await client.from("ka_profiles").select("role,approved").eq("id",session.user.id).single();
-  if(error||!profile||profile.role!=="student"||profile.approved!==true){await client.auth.signOut();location.replace("index.html");return}
+  if(error){document.body.classList.add("ready");say("خطا در بررسی دسترسی حساب: "+error.message);return}
+  if(!profile||profile.role!=="student"||profile.approved!==true){await client.auth.signOut();location.replace("index.html?auth=denied");return}
   document.getElementById("studentName").textContent=session.user.user_metadata?.full_name||session.user.email;
   document.body.classList.add("ready");
   const {data:lessons, error:lessonError}=await client.from("ka_lessons").select("id,title,description,created_at").eq("published",true).order("created_at",{ascending:false}).limit(8);
   const list=document.getElementById("lessons");list.innerHTML="";
   if(lessonError){list.innerHTML='<div class="empty">فعلاً امکان دریافت فهرست آموزش‌ها نیست.</div>'}
   else if(!lessons?.length){list.innerHTML='<div class="empty">هنوز آموزشی منتشر نشده است. به‌زودی درس‌های تازه اینجا قرار می‌گیرند.</div>'}
-  else lessons.forEach(item=>{const card=document.createElement("article");card.className="lesson";const h=document.createElement("h3");h.textContent=item.title||"آموزش بدون عنوان";const p=document.createElement("p");p.textContent=item.description||"برای مشاهده جزئیات این آموزش با معلم خود هماهنگ کن.";const tag=document.createElement("span");tag.className="tag";tag.textContent="آموزش";card.append(h,p,tag);list.append(card)});
-  const {count:efforts}=await client.from("ka_effort_cards").select("id",{count:"exact",head:true}).eq("student_id",session.user.id);
-  const {count:certs}=await client.from("ka_certificates").select("id",{count:"exact",head:true}).eq("student_id",session.user.id);
-  document.getElementById("effortCount").textContent=efforts??0;
-  document.getElementById("certificateCount").textContent=certs??0;
+  else lessons.forEach(item=>{const card=document.createElement("article");card.className="lesson";const h=document.createElement("h3");h.textContent=item.title||"آموزش بدون عنوان";const p=document.createElement("p");p.textContent=item.description||"برای مشاهده جزئیات این آموزش با معلم خود هماهنگ کن.";const tag=document.createElement("span");tag.className="tag";tag.textContent="آموزش منتشرشده";card.append(h,p,tag);list.append(card)});
+  const fileList=document.getElementById("lessonFiles");
+  fileList.innerHTML="";
+  if(!lessons?.length){fileList.innerHTML='<div class="empty">ابتدا باید یک درس منتشر شود تا فایل‌های آن نمایش داده شوند.</div>'}
+  else{
+   const lessonIds=lessons.map(x=>x.id);
+   const {data:files,error:fileError}=await client.from("ka_academy_files").select("id,lesson_id,file_name,file_path,created_at").in("lesson_id",lessonIds).order("created_at",{ascending:false});
+   if(fileError){fileList.innerHTML='<div class="empty">دریافت فایل‌ها ناموفق بود: '+fileError.message+'</div>'}
+   else if(!files?.length){fileList.innerHTML='<div class="empty">برای درس‌های منتشرشده هنوز فایلی بارگذاری نشده است.</div>'}
+   else files.forEach(file=>{
+    const card=document.createElement("article");card.className="lesson";
+    const h=document.createElement("h3");h.textContent=file.file_name||"فایل آموزشی";
+    const p=document.createElement("p");p.textContent="درس: "+(lessons.find(x=>x.id===file.lesson_id)?.title||"آموزش");
+    const button=document.createElement("button");button.type="button";button.textContent="دریافت فایل";button.style.cssText="margin-top:12px;background:#1c2b43;color:#fff;border-radius:9px;padding:9px 13px";
+    button.addEventListener("click",async()=>{
+     button.disabled=true;button.textContent="در حال آماده‌سازی...";
+     try{const {data,error}=await client.storage.from("academy-files").createSignedUrl(file.file_path,60);if(error)throw error;window.open(data.signedUrl,"_blank","noopener");}
+     catch(err){say("دریافت فایل انجام نشد: "+(err.message||"خطای نامشخص"));}
+     finally{button.disabled=false;button.textContent="دریافت فایل";}
+    });
+    card.append(h,p,button);fileList.append(card);
+   });
+  }
+  const {count:efforts,error:effortError}=await client.from("ka_effort_awards").select("id",{count:"exact",head:true}).eq("student_id",session.user.id);
+  const {count:certs,error:certError}=await client.from("ka_effort_certificates").select("id",{count:"exact",head:true}).eq("student_id",session.user.id);
+  if(!effortError)document.getElementById("effortCount").textContent=efforts??0;
+  if(!certError)document.getElementById("certificateCount").textContent=certs??0;
  }catch(e){document.body.classList.add("ready");say(e.message||"خطا در بارگذاری پنل دانش‌آموز.") }
 })();
 document.getElementById("askForm").addEventListener("submit",async(e)=>{
