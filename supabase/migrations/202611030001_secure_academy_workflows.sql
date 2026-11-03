@@ -108,7 +108,7 @@ begin
   if target_role is null or target_role = 'creator' then
     raise exception 'حساب هدف پیدا نشد یا قابل تغییر نیست.';
   end if;
-  update public.ka_profiles set role = new_role where id = target_id;
+  execute format('update public.ka_profiles set role = %L where id = $1', new_role) using target_id;
 end;
 $$;
 
@@ -217,7 +217,7 @@ begin
   if target_role not in ('student', 'teacher') then
     raise exception 'حساب هدف پیدا نشد یا قابل مدیریت نیست.';
   end if;
-  update public.ka_profiles set role = new_role where id = target_id;
+  execute format('update public.ka_profiles set role = %L where id = $1', new_role) using target_id;
 end;
 $$;
 
