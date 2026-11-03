@@ -65,7 +65,7 @@
           if(authUpdateError) throw authUpdateError;
           gate.remove();
           window.academyClient=client;
-          startTeacherPanel();
+          await startTeacherPanel();
         }catch(saveError){
           nameStatus.textContent="ذخیره نام انجام نشد: "+(saveError.message||"خطای نامشخص");
           saveName.disabled=false;
@@ -75,9 +75,9 @@
     }
     window.academyClient=client;
     document.body.classList.add("auth-ready");
-    startTeacherPanel();
+    await startTeacherPanel();
 
-    function startTeacherPanel(){
+    async function startTeacherPanel(){
 
     let lessons=[];
     const {data:lessonData,error:lessonError}=await client.from("ka_lessons")
