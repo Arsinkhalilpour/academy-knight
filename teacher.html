@@ -33,14 +33,51 @@
     const {data:{session},error:sessionError}=await client.auth.getSession();
     if(sessionError || !session){location.replace("./index.html?auth=required");return;}
     const {data:profile,error}=await client.from("ka_profiles")
-      .select("role,approved").eq("id",session.user.id).single();
+      .select("role,approved,full_name").eq("id",session.user.id).single();
     if(error || !profile || profile.approved!==true || profile.role!=="teacher"){
       await client.auth.signOut();
       location.replace("./index.html?auth=denied");
       return;
     }
+    // اگر نام و نام خانوادگی در پروفایل ثبت نشده باشد، پیش از ورود به پنل دریافت می‌شود.
+    if(!String(profile.full_name||"").trim()){
+      const gate=document.createElement("div");
+      gate.id="teacherNameGate";
+      gate.style.cssText="position:fixed;inset:0;z-index:9999;background:#050914ee;display:grid;place-items:center;padding:20px";
+      gate.innerHTML='<div style="width:min(100%,430px);background:#121d2d;border:1px solid #8d713b;border-radius:18px;padding:25px;color:#f4f6fb;font-family:Vazirmatn,Tahoma,sans-serif"><h2 style="margin:0 0 8px;font-size:19px">به آکادمی شوالیه خوش آمدی! ♞</h2><p style="font-size:12px;line-height:2;color:#b9c5d6">برای شروع فعالیت به‌عنوان معلم، لطفاً نام و نام خانوادگی خودت را وارد کن.</p><label for="teacherFullName" style="font-size:12px;color:#e8bd5b">نام و نام خانوادگی</label><input id="teacherFullName" autocomplete="name" maxlength="100" placeholder="مثلاً: علی رضایی" style="display:block;width:100%;margin:9px 0 13px;padding:13px;border:1px solid #394a63;border-radius:10px;background:#19283d;color:white;font:inherit"><button id="saveTeacherName" type="button" style="width:100%;border:0;border-radius:10px;background:#e8bd5b;padding:12px;font:700 13px Vazirmatn;cursor:pointer">ثبت نام و ورود به پنل</button><div id="teacherNameStatus" role="status" style="font-size:11px;color:#ffaaaa;margin-top:10px"></div></div>';
+      document.body.appendChild(gate);
+      document.body.classList.add("auth-ready");
+      const nameInput=gate.querySelector("#teacherFullName");
+      const saveName=gate.querySelector("#saveTeacherName");
+      const nameStatus=gate.querySelector("#teacherNameStatus");
+      saveName.addEventListener("click",async()=>{
+        const fullName=nameInput.value.trim().replace(/\\s+/g," ");
+        if(fullName.split(" ").filter(Boolean).length<2){
+          nameStatus.textContent="لطفاً نام و نام خانوادگی را کامل وارد کن.";
+          return;
+        }
+        saveName.disabled=true;nameStatus.textContent="در حال ذخیره اطلاعات...";
+        try{
+          const {error:profileUpdateError}=await client.from("ka_profiles")
+            .update({full_name:fullName}).eq("id",session.user.id);
+          if(profileUpdateError) throw profileUpdateError;
+          const {error:authUpdateError}=await client.auth.updateUser({data:{full_name:fullName}});
+          if(authUpdateError) throw authUpdateError;
+          gate.remove();
+          window.academyClient=client;
+          startTeacherPanel();
+        }catch(saveError){
+          nameStatus.textContent="ذخیره نام انجام نشد: "+(saveError.message||"خطای نامشخص");
+          saveName.disabled=false;
+        }
+      });
+      return;
+    }
     window.academyClient=client;
     document.body.classList.add("auth-ready");
+    startTeacherPanel();
+
+    function startTeacherPanel(){
 
     let lessons=[];
     const {data:lessonData,error:lessonError}=await client.from("ka_lessons")
@@ -163,6 +200,7 @@
         setStatus("بارگذاری انجام نشد: "+(err.message||"خطای نامشخص"),true);
       }finally{uploadBtn.disabled=false;}
     });
+    }
   } catch(e) {
     console.error(e);
     setStatus("خطا در اتصال یا دریافت اطلاعات: "+(e.message||"خطای نامشخص"),true);
