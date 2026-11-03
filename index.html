@@ -95,7 +95,7 @@ document.getElementById("login").addEventListener("submit",async e=>{
   const {data,error}=await client.auth.signInWithPassword({email,password});
   if(error) throw error;
   const {data:profile,error:profileError}=await client.from("ka_profiles").select("role,approved").eq("id",data.user.id).single();
-  if(profileError) throw new Error("ورود انجام شد، اما خواندن نقش حساب ممکن نشد: "+profileError.message);
+  if(profileError){await client.auth.signOut();throw new Error("ورود انجام شد، اما پروفایل حساب خوانده نشد. مدیر باید مهاجرت دیتابیس را اجرا کند. جزئیات: "+profileError.message);}
   if(!profile || profile.approved!==true){
    await client.auth.signOut();
    showStatus("حساب شما هنوز توسط مدیر تأیید نشده است.",true);
@@ -126,7 +126,8 @@ document.getElementById("signup").addEventListener("submit",async e=>{
   const {data,error}=await client.auth.signUp({email,password,options:{data:{full_name:fullName}}});
   if(error) throw error;
   if(data.session){
-   showStatus("ثبت‌نام انجام شد. حساب شما پس از تأیید مدیر امکان ورود به پنل را خواهد داشت.");
+   await client.auth.signOut();
+   showStatus("ثبت‌نام انجام شد. حساب شما پس از تأیید مدیر امکان ورود به پنل را خواهد داشت. اکنون می‌توانی صفحه را ببندی.");
   }else{
    showStatus("ثبت‌نام اولیه انجام شد. اگر تأیید ایمیل فعال است، ایمیل خود را بررسی کن؛ سپس منتظر تأیید مدیر بمان.");
   }
