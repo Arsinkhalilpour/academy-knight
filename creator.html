@@ -94,7 +94,6 @@ async function reviewUser(id,fn,row){
  await loadPendingUsers();
 }
 document.getElementById("refreshPending")?.addEventListener("click",loadPendingUsers);
-document.getElementById("refreshRoles")?.addEventListener("click",loadApprovedUsers);
 
 async function loadCreatorStats(){
  const [usersRes,pendingRes,lessonRes]=await Promise.all([
