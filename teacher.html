@@ -51,7 +51,7 @@
       const saveName=gate.querySelector("#saveTeacherName");
       const nameStatus=gate.querySelector("#teacherNameStatus");
       saveName.addEventListener("click",async()=>{
-        const fullName=nameInput.value.trim().replace(/\\s+/g," ");
+        const fullName=nameInput.value.trim().replace(/\s+/g," ");
         if(fullName.split(" ").filter(Boolean).length<2){
           nameStatus.textContent="لطفاً نام و نام خانوادگی را کامل وارد کن.";
           return;
@@ -109,7 +109,8 @@
     await loadFiles(lessons);
 
     function renderMyLessons(){
-      const mine=lessons.filter(x=>x.created_by===session.user.id);\n      document.getElementById("myLessonCount").textContent=mine.length;
+      const mine=lessons.filter(x=>x.created_by===session.user.id);
+      document.getElementById("myLessonCount").textContent=mine.length;
       myLessons.innerHTML="";
       if(!mine.length){myLessons.textContent="هنوز درسی توسط شما ثبت نشده است.";return;}
       mine.forEach(lesson=>{
