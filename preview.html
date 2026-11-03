@@ -36,10 +36,9 @@
 <script>
 (function(){
  const tabs=[...document.querySelectorAll(".tab")],panels=[...document.querySelectorAll(".panel")];
- tabs.forEach(tab=>tab.addEventListener("click",()=>{
-  tabs.forEach(x=>x.classList.toggle("active",x===tab));
-  panels.forEach(panel=>panel.classList.toggle("active",panel.id===tab.dataset.panel));
- }));
+ function showPanel(name){const selected=tabs.find(x=>x.dataset.panel===name)||tabs[0];tabs.forEach(x=>x.classList.toggle("active",x===selected));panels.forEach(panel=>panel.classList.toggle("active",panel.id===selected.dataset.panel));}
+ tabs.forEach(tab=>tab.addEventListener("click",()=>showPanel(tab.dataset.panel)));
+ showPanel(new URLSearchParams(location.search).get("view"));
 })();
 (async function(){
  const URL="https://rdsermutogewhcdsyoon.supabase.co";
