@@ -89,13 +89,57 @@ document.getElementById("askForm").addEventListener("submit",async(e)=>{
  const question=input.value.trim(); if(!question)return;
  const add=(text,kind)=>{const d=document.createElement("div");d.className="bubble "+kind;d.textContent=text;log.append(d);log.scrollTop=log.scrollHeight;};
  add(question,"me");input.value="";button.disabled=true;note.textContent="معلم هوشمند در حال فکر کردن است...";
- try{
-  const {data,error}=await window.academyClient.functions.invoke("knight-tutor",{body:{question}});
-  if(error)throw error;
-  if(data?.error)throw new Error(data.error);
-  add(data.answer||"پاسخی دریافت نشد.","ai");note.textContent="";
- }catch(err){add(err.message||"ارتباط برقرار نشد.","ai");note.textContent="اگر تابع هنوز روی Supabase منتشر نشده، ابتدا باید آن را راه‌اندازی کنیم."}
- finally{button.disabled=false;input.focus();}
+ try {
+  const { data, error } =
+    await window.academyClient.functions.invoke(
+      "knight-tutor",
+      { body: { question } }
+    );
+
+  if (error) {
+    let detail = "";
+    let status = "";
+
+    if (error.context) {
+      status = error.context.status || "";
+
+      try {
+        const response = await error.context.clone().json();
+        detail = response.error || response.message || "";
+      } catch {
+        try {
+          detail = await error.context.clone().text();
+        } catch {
+          detail = "";
+        }
+      }
+    }
+
+    throw new Error(
+      detail || `خطای تابع هوشمند. کد وضعیت: ${status || "نامشخص"}`
+    );
+  }
+
+  if (data?.error) {
+    throw new Error(data.error);
+  }
+
+  if (!data?.answer) {
+    throw new Error("پاسخ متنی از هوش مصنوعی دریافت نشد.");
+  }
+
+  add(data.answer, "ai");
+  note.textContent = "";
+
+} catch (err) {
+  const message = err?.message || "خطای ناشناخته در ارتباط با معلم هوشمند";
+  add("جزئیات خطا: " + message, "ai");
+  note.textContent = "لطفاً جزئیات خطا را بررسی کن.";
+  console.error("Knight Tutor Error:", err);
+} finally {
+  button.disabled = false;
+  input.focus();
+}
 });
 document.getElementById("logout").addEventListener("click",async()=>{if(window.supabase){const c=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);await c.auth.signOut()}location.replace("index.html")});
 </script></body></html>
