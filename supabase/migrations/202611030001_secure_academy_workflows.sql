@@ -97,7 +97,7 @@ begin
   ) then
     raise exception 'فقط Creator اجازه تغییر نقش دارد.' using errcode = '42501';
   end if;
-  if new_role not in ('student', 'teacher', 'admin') then
+  if new_role is null or new_role not in ('student', 'teacher', 'admin') then
     raise exception 'این نقش قابل واگذاری نیست.';
   end if;
   if target_id = auth.uid() then
@@ -205,7 +205,7 @@ begin
   ) then
     raise exception 'فقط مدیر تأییدشده اجازه تغییر دسترسی دارد.' using errcode = '42501';
   end if;
-  if new_role not in ('student', 'teacher') then
+  if new_role is null or new_role not in ('student', 'teacher') then
     raise exception 'مدیر فقط می‌تواند دسترسی معلم را فعال یا لغو کند.';
   end if;
   if target_id = auth.uid() then
