@@ -138,7 +138,8 @@
       if(error) throw error;
       const names=new Map(lessonList.map(x=>[x.id,x.title]));
       fileRows.innerHTML="";
-      document.getElementById("myFileCount").textContent=(files||[]).filter(x=>x.uploaded_by===session.user.id).length;\n      if(!files || !files.length){
+      document.getElementById("myFileCount").textContent=(files||[]).filter(x=>x.uploaded_by===session.user.id).length;
+      if(!files || !files.length){
         fileRows.innerHTML='<tr><td colspan="4" class="empty">هنوز فایلی بارگذاری نشده است.</td></tr>';
         return;
       }
