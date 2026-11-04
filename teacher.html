@@ -218,9 +218,16 @@
         const link=document.createElement("a"); link.href="#"; link.className="filelink"; link.textContent="دریافت فایل";
         link.addEventListener("click",async ev=>{
           ev.preventDefault();
-          const {data,error}=await client.storage.from(BUCKET).createSignedUrl(file.file_path,60);
-          if(error){setStatus("دریافت لینک فایل ناموفق بود: "+error.message,true);return;}
-          window.open(data.signedUrl,"_blank","noopener");
+          const fileTab=window.open("about:blank","_blank");
+          try{
+            const {data,error}=await client.storage.from(BUCKET).createSignedUrl(file.file_path,60);
+            if(error)throw error;
+            if(fileTab){fileTab.opener=null;fileTab.location.href=data.signedUrl;}
+            else{window.location.href=data.signedUrl;}
+          }catch(error){
+            if(fileTab)fileTab.close();
+            setStatus("دریافت لینک فایل ناموفق بود: "+(error.message||"خطای نامشخص"),true);
+          }
         });
         action.appendChild(link);
         if(file.uploaded_by===session.user.id){
