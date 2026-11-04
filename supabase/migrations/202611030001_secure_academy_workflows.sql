@@ -135,6 +135,29 @@ begin
 end;
 $$;
 
+-- Creator may revoke an approved student's access without deleting the Auth account.
+create or replace function public.ka_creator_revoke_student_access_v1(target_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $
+begin
+  if not exists (
+    select 1 from public.ka_profiles p
+    where p.id = auth.uid() and p.role::text = 'creator' and p.approved is true
+  ) then
+    raise exception 'فقط Creator تأییدشده اجازه لغو دسترسی دارد.' using errcode = '42501';
+  end if;
+  update public.ka_profiles
+  set approved = false
+  where id = target_id and role::text = 'student' and approved is true;
+  if not found then
+    raise exception 'دانش‌آموز تأییدشده پیدا نشد یا دسترسی او قبلاً لغو شده است.';
+  end if;
+end;
+$;
+
 -- Creator can add a published or draft lesson without exposing table write privileges.
 create or replace function public.ka_creator_create_lesson(
   lesson_title text,
@@ -357,6 +380,7 @@ revoke all on function public.ka_creator_list_users_v2() from public, anon;
 revoke all on function public.ka_creator_list_pending_users_v2() from public, anon;
 revoke all on function public.ka_creator_set_user_role(uuid, text) from public, anon;
 revoke all on function public.ka_creator_approve_signup(uuid) from public, anon;
+revoke all on function public.ka_creator_revoke_student_access_v1(uuid) from public, anon;
 revoke all on function public.ka_creator_create_lesson(text, text, boolean) from public, anon;
 revoke all on function public.ka_admin_list_people() from public, anon;
 revoke all on function public.ka_admin_set_teacher_role(uuid, text) from public, anon;
@@ -367,6 +391,7 @@ grant execute on function public.ka_creator_list_users_v2() to authenticated;
 grant execute on function public.ka_creator_list_pending_users_v2() to authenticated;
 grant execute on function public.ka_creator_set_user_role(uuid, text) to authenticated;
 grant execute on function public.ka_creator_approve_signup(uuid) to authenticated;
+grant execute on function public.ka_creator_revoke_student_access_v1(uuid) to authenticated;
 grant execute on function public.ka_creator_create_lesson(text, text, boolean) to authenticated;
 grant execute on function public.ka_admin_list_people() to authenticated;
 grant execute on function public.ka_admin_set_teacher_role(uuid, text) to authenticated;
