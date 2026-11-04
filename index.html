@@ -29,6 +29,11 @@ footer{text-align:center;color:#718097;font-size:10px;margin-top:20px}
 <label for="loginEmail">ایمیل</label><input id="loginEmail" type="email" autocomplete="email" required placeholder="ایمیل حساب کاربری">
 <label for="loginPassword">رمز عبور</label><input id="loginPassword" type="password" autocomplete="current-password" required placeholder="رمز عبور">
 <button class="submit" type="submit">ورود به آکادمی</button>
+<button id="forgotPassword" type="button" style="width:100%;margin-top:12px;background:transparent;color:var(--gold);border:0;font:inherit;font-size:11px;cursor:pointer">رمز عبورم را فراموش کرده‌ام</button>
+</form>
+<form id="resetPassword" class="form">
+<label for="newPassword">رمز عبور جدید</label><input id="newPassword" type="password" autocomplete="new-password" minlength="8" required placeholder="حداقل ۸ نویسه">
+<button class="submit" type="submit">ثبت رمز عبور جدید</button>
 </form>
 <form id="signup" class="form">
 <label for="fullName">نام و نام خانوادگی</label><input id="fullName" autocomplete="name" required placeholder="نام شما">
@@ -77,11 +82,49 @@ function friendlyError(error){
  if(lower.includes("already registered")) return "این ایمیل قبلاً ثبت‌نام کرده است؛ وارد حساب شو.";
  return "خطا: "+message;
 }
-document.querySelectorAll(".tab").forEach(tab=>tab.addEventListener("click",()=>{
- document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===tab));
- document.querySelectorAll(".form").forEach(x=>x.classList.toggle("active",x.id===tab.dataset.form));
+function showForm(id){
+ document.querySelectorAll(".form").forEach(x=>x.classList.toggle("active",x.id===id));
+ document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x.dataset.form===id));
  statusBox.style.display="none";
-}));
+}
+document.querySelectorAll(".tab").forEach(tab=>tab.addEventListener("click",()=>showForm(tab.dataset.form)));
+document.getElementById("forgotPassword").addEventListener("click",async()=>{
+ const email=document.getElementById("loginEmail").value.trim();
+ if(!email){showStatus("ابتدا ایمیل حساب خود را در کادر ایمیل وارد کن.",true);return;}
+ const button=document.getElementById("forgotPassword");button.disabled=true;
+ try{
+  const client=await loadSupabase();
+  const {error}=await client.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname});
+  if(error)throw error;
+  showStatus("اگر این ایمیل در آکادمی ثبت شده باشد، لینک بازیابی رمز برایش ارسال می‌شود. صندوق ورودی و پوشه هرزنامه را بررسی کن.");
+ }catch(error){showStatus(friendlyError(error),true);}
+ finally{button.disabled=false;}
+});
+document.getElementById("resetPassword").addEventListener("submit",async e=>{
+ e.preventDefault();
+ const button=e.currentTarget.querySelector("button[type=submit]");button.disabled=true;
+ try{
+  const client=await loadSupabase();
+  const password=document.getElementById("newPassword").value;
+  const {error}=await client.auth.updateUser({password});
+  if(error)throw error;
+  await client.auth.signOut();
+  showForm("login");
+  showStatus("رمز عبور با موفقیت تغییر کرد. حالا با رمز جدید وارد شو.");
+  document.getElementById("resetPassword").reset();
+ }catch(error){showStatus(friendlyError(error),true);}
+ finally{button.disabled=false;}
+});
+(async()=>{
+ try{
+  const client=await loadSupabase();
+  client.auth.onAuthStateChange((event)=>{
+   if(event==="PASSWORD_RECOVERY"){showForm("resetPassword");showStatus("لینک بازیابی تأیید شد. رمز عبور جدیدت را وارد کن.");}
+  });
+  const {data:{session}}=await client.auth.getSession();
+  if(session && window.location.hash.includes("type=recovery"))showForm("resetPassword");
+ }catch(error){console.warn("Password recovery initialization:",error);}
+})();
 document.getElementById("login").addEventListener("submit",async e=>{
  e.preventDefault();
  e.stopPropagation();
