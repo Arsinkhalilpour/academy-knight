@@ -70,3 +70,28 @@ grant select,insert on public.ka_chat_messages to authenticated;
 grant select,insert,update on public.ka_chat_groups to authenticated;
 grant select,insert,delete on public.ka_chat_group_members to authenticated;
 grant select,insert on public.ka_chat_group_messages to authenticated;
+
+
+-- Fix RLS recursion for group membership checks
+create or replace function public.ka_chat_is_member(gid uuid)
+returns boolean language sql stable security definer set search_path=public
+as $$ select exists(select 1 from public.ka_chat_group_members m where m.group_id=gid and m.user_id=auth.uid()) $$;
+create or replace function public.ka_chat_is_owner(gid uuid)
+returns boolean language sql stable security definer set search_path=public
+as $$ select exists(select 1 from public.ka_chat_groups g where g.id=gid and g.created_by=auth.uid()) $$;
+revoke all on function public.ka_chat_is_member(uuid) from public;
+revoke all on function public.ka_chat_is_owner(uuid) from public;
+grant execute on function public.ka_chat_is_member(uuid) to authenticated;
+grant execute on function public.ka_chat_is_owner(uuid) to authenticated;
+drop policy if exists "members view groups" on public.ka_chat_groups;
+create policy "members view groups" on public.ka_chat_groups for select to authenticated using(public.ka_chat_is_member(id));
+drop policy if exists "members see group membership" on public.ka_chat_group_members;
+create policy "members see group membership" on public.ka_chat_group_members for select to authenticated using(public.ka_chat_is_member(group_id));
+drop policy if exists "group owner adds members" on public.ka_chat_group_members;
+create policy "group owner adds members" on public.ka_chat_group_members for insert to authenticated with check(public.ka_chat_is_owner(group_id) and exists(select 1 from public.ka_profiles p where p.id=user_id and p.approved=true));
+drop policy if exists "group owner removes members" on public.ka_chat_group_members;
+create policy "group owner removes members" on public.ka_chat_group_members for delete to authenticated using(public.ka_chat_is_owner(group_id) or user_id=auth.uid());
+drop policy if exists "members read group messages" on public.ka_chat_group_messages;
+create policy "members read group messages" on public.ka_chat_group_messages for select to authenticated using(public.ka_chat_is_member(group_id));
+drop policy if exists "members send group messages" on public.ka_chat_group_messages;
+create policy "members send group messages" on public.ka_chat_group_messages for insert to authenticated with check(sender_id=auth.uid() and public.ka_chat_is_member(group_id));
