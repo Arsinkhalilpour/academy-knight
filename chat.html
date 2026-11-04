@@ -11,7 +11,7 @@
 <div id="sideProfile" class="hidden"><div class="hint" id="myRole"></div><button class="btn alt" id="editProfile">ویرایش پروفایل</button></div></aside>
 <section class="panel"><div class="chathead"><div><b id="chatTitle">یک گفت‌وگو انتخاب کن</b><div><small id="chatSubtitle">پیام‌ها خصوصی هستند.</small></div></div><button class="btn alt hidden" id="groupManage">مدیریت اعضا</button></div><div class="messages" id="messages"><div class="empty">از فهرست افراد یا گروه‌ها یک مورد انتخاب کن.</div></div><form class="send" id="sendForm"><input class="field" id="messageInput" maxlength="2000" placeholder="پیامت را بنویس..." disabled required><button class="btn" id="sendBtn" disabled>ارسال</button></form><div class="status" id="chatStatus"></div></section></div></div>
 <script>
-const URL="https://rdsermutogewhcdsyoon.supabase.co",KEY="sb_publishable_kybJ2B3BKoT2fScPaz6xRQ_eBOSwiqi",db=supabase.createClient(URL,KEY);
+const SUPABASE_URL="https://rdsermutogewhcdsyoon.supabase.co",KEY="sb_publishable_kybJ2B3BKoT2fScPaz6xRQ_eBOSwiqi",db=supabase.createClient(SUPABASE_URL,KEY);
 let me=null,role=null,profile=null,selected=null,mode="people",contacts=[],groups=[];
 const $=id=>document.getElementById(id), roleFa={student:"دانش‌آموز",teacher:"معلم",admin:"مدیر",creator:"سازنده"};
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
