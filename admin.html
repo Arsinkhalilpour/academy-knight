@@ -42,7 +42,7 @@ async function loadAdminData(){
   const [lessonsRes,filesRes,profilesRes,lessonCountRes,fileCountRes]=await Promise.all([
    client.from("ka_lessons").select("id,title,created_by,created_at").order("created_at",{ascending:false}).limit(12),
    client.from("ka_academy_files").select("id,file_name,lesson_id,uploaded_by,created_at").order("created_at",{ascending:false}).limit(12),
-   client.from("ka_profiles").select("id,role,approved"),
+   client.rpc("ka_admin_list_people"),
    client.from("ka_lessons").select("id",{count:"exact",head:true}),
    client.from("ka_academy_files").select("id",{count:"exact",head:true})
   ]);
