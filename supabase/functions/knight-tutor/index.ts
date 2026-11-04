@@ -1,5 +1,5 @@
 // Supabase Edge Function: knight-tutor
-// Required Edge Function secrets: GEMINI_API_KEY, SUPABASE_URL, SUPABASE_ANON_KEY
+// Required secrets: GROQ_API_KEY, SUPABASE_URL, SUPABASE_ANON_KEY
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const allowedOrigin = "https://arsinkhalilpour.github.io";
@@ -23,10 +23,11 @@ Deno.serve(async (req: Request) => {
     const authorization = req.headers.get("Authorization");
     if (!authorization) return Response.json({ error: "ابتدا وارد حساب شو." }, { status: 401, headers: cors });
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const geminiKey = Deno.env.get("GEMINI_API_KEY");
-    if (!geminiKey) return Response.json({ error: "کلید امن هوش مصنوعی هنوز در سرور تنظیم نشده است." }, { status: 503, headers: cors });
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    const groqKey = Deno.env.get("GROQ_API_KEY");
+    if (!supabaseUrl || !anonKey) return Response.json({ error: "تنظیمات اتصال سرور کامل نیست." }, { status: 503, headers: cors });
+    if (!groqKey) return Response.json({ error: "کلید Groq در Secrets سرور تنظیم نشده است." }, { status: 503, headers: cors });
 
     const supabase = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authorization } },
@@ -48,21 +49,33 @@ Deno.serve(async (req: Request) => {
     }
 
     const prompt = "تو معلم مهربان و دقیق آکادمی شوالیه برای دانش‌آموز پایه پنجم دبستان ایران هستی. فارسی ساده و مناسب سن پاسخ بده. مرحله‌به‌مرحله راهنمایی کن، جواب تکلیف را بی‌توضیح تحویل نده و دانش‌آموز را به فکر کردن تشویق کن. اگر سؤال خارج از آموزش مدرسه بود، کوتاه و امن پاسخ بده و به درس برگردان. پرسش دانش‌آموز: " + question;
-    const geminiResponse = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + encodeURIComponent(geminiKey), {
+    const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.5, maxOutputTokens: 700 } }),
+      headers: {
+        "Authorization": "Bearer " + groqKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "openai/gpt-oss-20b",
+        messages: [
+          { role: "system", content: "You are a kind, careful Persian-language elementary school tutor. Keep responses age-appropriate and educational." },
+          { role: "user", content: prompt },
+        ],
+        temperature: 0.5,
+        max_tokens: 700,
+      }),
     });
-    const result = await geminiResponse.json();
-    if (!geminiResponse.ok) {
-      console.error("Gemini error", result);
-      return Response.json({ error: "فعلاً معلم هوشمند پاسخ نمی‌دهد. کمی بعد دوباره امتحان کن." }, { status: 502, headers: cors });
+
+    const result = await groqResponse.json();
+    if (!groqResponse.ok) {
+      console.error("Groq API error", { status: groqResponse.status, error: result?.error?.message || "Unknown provider error" });
+      return Response.json({ error: "پاسخ‌گویی Groq ناموفق بود. وضعیت سرویس یا کلید API را بررسی کن." }, { status: 502, headers: cors });
     }
-    const answer = result.candidates?.[0]?.content?.parts?.map((p: {text?: string}) => p.text ?? "").join("").trim();
-    if (!answer) return Response.json({ error: "پاسخی دریافت نشد؛ دوباره تلاش کن." }, { status: 502, headers: cors });
+    const answer = result.choices?.[0]?.message?.content?.trim();
+    if (!answer) return Response.json({ error: "پاسخی از Groq دریافت نشد؛ دوباره تلاش کن." }, { status: 502, headers: cors });
     return Response.json({ answer }, { headers: { ...cors, "Content-Type": "application/json" } });
   } catch (error) {
-    console.error(error);
+    console.error("Knight tutor error", error);
     return Response.json({ error: "خطای موقت در معلم هوشمند." }, { status: 500, headers: cors });
   }
 });
