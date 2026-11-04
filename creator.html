@@ -97,6 +97,16 @@ async function loadPendingUsers(){
   const approve=document.createElement("button");approve.className="btn gold";approve.textContent="تأیید";
   const reject=document.createElement("button");reject.className="btn";reject.textContent="رد";
   approve.onclick=()=>reviewUser(user.user_id,"ka_creator_approve_signup",tr);
+  reject.onclick=async()=>{
+   if(!confirm("این درخواست رد و حسابِ تأییدنشده حذف شود؟ این کار قابل بازگشت از داخل سایت نیست."))return;
+   reject.disabled=true;reject.textContent="در حال حذف...";
+   try{
+    const {data,error}=await window.kaSupabase.functions.invoke("reject-signup",{body:{user_id:user.user_id}});
+    if(error)throw error;
+    if(data?.error)throw new Error(data.error);
+    await loadPendingUsers();await loadCreatorStats();
+   }catch(error){alert("رد درخواست انجام نشد: "+(error.message||"خطای نامشخص"));reject.disabled=false;reject.textContent="رد";}
+  };
   actions.append(approve,reject);tr.append(name,email,status,actions);body.append(tr);
  });
 }
