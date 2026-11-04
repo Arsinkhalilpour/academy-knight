@@ -36,6 +36,54 @@ create table if not exists public.ka_chat_group_messages (
  created_at timestamptz not null default now()
 );
 
+-- Use a SECURITY DEFINER helper so message INSERT checks are not blocked by RLS on ka_profiles.
+create or replace function public.ka_chat_is_approved_user(uid uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $
+ select exists (
+   select 1 from public.ka_profiles p
+   where p.id = uid and p.approved = true
+ );
+$;
+revoke all on function public.ka_chat_is_approved_user(uuid) from public;
+grant execute on function public.ka_chat_is_approved_user(uuid) to authenticated;
+
+-- Remove chat data even if an account is removed from the academy profile table.
+create or replace function public.ka_chat_cleanup_deleted_academy_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $
+begin
+ delete from public.ka_chat_messages
+ where sender_id = old.id or recipient_id = old.id;
+
+ delete from public.ka_chat_group_messages
+ where sender_id = old.id;
+
+ delete from public.ka_chat_group_members
+ where user_id = old.id;
+
+ delete from public.ka_chat_groups
+ where created_by = old.id;
+
+ delete from public.ka_chat_profiles
+ where user_id = old.id;
+
+ return old;
+end;
+$;
+
+drop trigger if exists ka_chat_cleanup_deleted_academy_user on public.ka_profiles;
+create trigger ka_chat_cleanup_deleted_academy_user
+after delete on public.ka_profiles
+for each row execute function public.ka_chat_cleanup_deleted_academy_user();
+
 create or replace function public.ka_chat_is_member(gid uuid)
 returns boolean language sql stable security definer set search_path=public
 as $$ select exists(select 1 from public.ka_chat_group_members m where m.group_id=gid and m.user_id=auth.uid()) $$;
@@ -66,9 +114,9 @@ create policy "participants read direct messages" on public.ka_chat_messages for
 using(sender_id=auth.uid() or recipient_id=auth.uid());
 drop policy if exists "send direct messages as self" on public.ka_chat_messages;
 create policy "send direct messages as self" on public.ka_chat_messages for insert to authenticated
-with check(sender_id=auth.uid()
- and exists(select 1 from public.ka_profiles p where p.id=auth.uid() and p.approved=true)
- and exists(select 1 from public.ka_profiles p where p.id=recipient_id and p.approved=true));
+with check(sender_id=(select auth.uid())
+ and public.ka_chat_is_approved_user((select auth.uid()))
+ and public.ka_chat_is_approved_user(recipient_id));
 
 drop policy if exists "members view groups" on public.ka_chat_groups;
 create policy "members view groups" on public.ka_chat_groups for select to authenticated
