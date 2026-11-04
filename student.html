@@ -29,7 +29,14 @@ button{font:inherit;border:0;border-radius:9px;padding:9px 13px;cursor:pointer}.
 </section>
 <h2 class="section-title">آخرین آموزش‌ها</h2><section class="lessons" id="lessons"><div class="empty">در حال دریافت آموزش‌ها...</div></section>
 <h2 class="section-title">فایل‌های آموزشی درس‌ها</h2><section class="lessons" id="lessonFiles"><div class="empty">در حال دریافت فایل‌ها...</div></section>
-<h2 class="section-title">معلم هوشمند آکادمی ✦</h2><section class="tutor"><b>از درس‌هایت هر سؤالی داری بپرس!</b><p>معلم هوشمند با زبان ساده راهنمایی‌ات می‌کند و کمک می‌کند خودت مسئله را یاد بگیری.</p><div id="chatlog" class="chatlog" aria-live="polite"><div class="bubble ai">سلام قهرمان! 😊 سؤال درسی‌ات را بنویس تا با هم حلش کنیم.</div></div><form id="askForm" class="askrow"><input id="question" maxlength="1500" placeholder="مثلاً کسرها را چطور جمع کنم؟" required><button id="askButton" type="submit">ارسال</button></form><div id="tutorStatus" class="muted" style="color:#e8c66f;margin-top:8px;font-size:11px"></div></section><h2 class="section-title">پیشرفت من</h2><section class="cards">
+<h2 class="section-title">معلم هوشمند آکادمی ✦</h2><section class="tutor"><b>از درس‌هایت هر سؤالی داری بپرس!</b><p>معلم هوشمند با زبان ساده راهنمایی‌ات می‌کند و کمک می‌کند خودت مسئله را یاد بگیری.</p><div id="chatlog" class="chatlog" aria-live="polite"><div class="bubble ai">سلام قهرمان! 😊 سؤال درسی‌ات را بنویس تا با هم حلش کنیم.</div></div><form id="askForm" class="askrow"><input id="question" maxlength="1500" placeholder="مثلاً کسرها را چطور جمع کنم؟" required><button id="askButton" type="submit">ارسال</button></form><div id="tutorStatus" class="muted" style="color:#e8c66f;margin-top:8px;font-size:11px"></div></section><h2 class="section-title">چت با خانم سلیمی 💬</h2>
+<section class="tutor" style="background:#17263b">
+ <b>پیام خصوصی با معلم</b><p>پیامت را اینجا بنویس؛ پاسخ خانم سلیمی در همین بخش نمایش داده می‌شود.</p>
+ <div id="teacherChatLog" class="chatlog" aria-live="polite"><div class="bubble ai">سلام! پیام‌هایت را اینجا می‌بینی.</div></div>
+ <form id="teacherChatForm" class="askrow"><input id="teacherChatInput" maxlength="2000" placeholder="پیامت برای خانم سلیمی..." required><button id="teacherChatSend" type="submit">ارسال</button></form>
+ <div style="display:flex;gap:8px;align-items:center;margin-top:10px"><button id="teacherChatRefresh" type="button" style="background:#e9bd5b;color:#172033">به‌روزرسانی پیام‌ها</button><span id="teacherChatStatus" style="font-size:11px;color:#e8c66f"></span></div>
+</section>
+<h2 class="section-title">پیشرفت من</h2><section class="cards">
 <div class="stat"><b id="effortCount">۰</b><small>کارت تلاش دریافت‌شده</small></div>
 <div class="stat"><b id="certificateCount">۰</b><small>لوح تقدیر من</small></div>
 </section>
@@ -49,6 +56,27 @@ const SUPABASE_KEY="sb_publishable_kybJ2B3BKoT2fScPaz6xRQ_eBOSwiqi";
   if(error){document.body.classList.add("ready");say("خطا در بررسی دسترسی حساب: "+error.message);return}
   if(!profile||profile.role!=="student"||profile.approved!==true){await client.auth.signOut();location.replace("index.html?auth=denied");return}
   document.getElementById("studentName").textContent=session.user.user_metadata?.full_name||session.user.email;
+  const chatLog=document.getElementById("teacherChatLog"),chatStatus=document.getElementById("teacherChatStatus");
+  const showChatStatus=(msg)=>{chatStatus.textContent=msg;};
+  async function loadTeacherChat(){
+   const {data,error}=await client.from("ka_teacher_messages").select("id,sender_role,message,created_at").order("created_at",{ascending:true}).limit(100);
+   if(error){showChatStatus("برای فعال‌شدن چت، مدیر باید تنظیمات پایگاه داده را اجرا کند.");return;}
+   chatLog.innerHTML="";
+   if(!data?.length){chatLog.innerHTML='<div class="bubble ai">هنوز پیامی ردوبدل نشده است. اولین پیام را بفرست! 😊</div>';return;}
+   data.forEach(m=>{const d=document.createElement("div");d.className="bubble "+(m.sender_role==="student"?"me":"ai");d.textContent=(m.sender_role==="student"?"شما: ":"خانم سلیمی: ")+m.message;chatLog.append(d);});
+   chatLog.scrollTop=chatLog.scrollHeight;showChatStatus("");
+  }
+  document.getElementById("teacherChatRefresh").addEventListener("click",loadTeacherChat);
+  document.getElementById("teacherChatForm").addEventListener("submit",async e=>{
+   e.preventDefault();const input=document.getElementById("teacherChatInput"),btn=document.getElementById("teacherChatSend"),message=input.value.trim();if(!message)return;
+   btn.disabled=true;showChatStatus("در حال ارسال...");
+   const {error}=await client.from("ka_teacher_messages").insert({student_id:session.user.id,sender_id:session.user.id,sender_role:"student",message});
+   if(error)showChatStatus("ارسال پیام انجام نشد؛ تنظیمات چت باید در Supabase اجرا شود.");
+   else{input.value="";await loadTeacherChat();showChatStatus("پیام ارسال شد.");}
+   btn.disabled=false;
+  });
+  await loadTeacherChat();
+
   document.body.classList.add("ready");
   const {data:lessons, error:lessonError}=await client.from("ka_lessons").select("id,title,description,created_at").eq("published",true).order("created_at",{ascending:false}).limit(8);
   const list=document.getElementById("lessons");list.innerHTML="";
