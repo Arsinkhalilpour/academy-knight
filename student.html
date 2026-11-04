@@ -98,8 +98,13 @@ const SUPABASE_KEY="sb_publishable_kybJ2B3BKoT2fScPaz6xRQ_eBOSwiqi";
     const button=document.createElement("button");button.type="button";button.textContent="دریافت فایل";button.style.cssText="margin-top:12px;background:#1c2b43;color:#fff;border-radius:9px;padding:9px 13px";
     button.addEventListener("click",async()=>{
      button.disabled=true;button.textContent="در حال آماده‌سازی...";
-     try{const {data,error}=await client.storage.from("academy-files").createSignedUrl(file.file_path,60);if(error)throw error;window.open(data.signedUrl,"_blank","noopener");}
-     catch(err){say("دریافت فایل انجام نشد: "+(err.message||"خطای نامشخص"));}
+     const fileTab=window.open("about:blank","_blank");
+     try{
+      const {data,error}=await client.storage.from("academy-files").createSignedUrl(file.file_path,60);
+      if(error)throw error;
+      if(fileTab){fileTab.opener=null;fileTab.location.href=data.signedUrl;}
+      else{window.location.href=data.signedUrl;}
+     }catch(err){if(fileTab)fileTab.close();say("دریافت فایل انجام نشد: "+(err.message||"خطای نامشخص"));}
      finally{button.disabled=false;button.textContent="دریافت فایل";}
     });
     card.append(h,p,button);fileList.append(card);
