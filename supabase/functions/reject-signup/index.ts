@@ -54,15 +54,14 @@ Deno.serve(async (req: Request) => {
       return reply({ error: "شناسه درخواست معتبر نیست." }, 400, origin);
     }
 
-    const { data: target, error: targetError } = await userClient
+    const adminClient = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { data: target, error: targetError } = await adminClient
       .from("ka_profiles").select("role,approved").eq("id", targetId).single();
     if (targetError || target?.role !== "student" || target?.approved !== false) {
       return reply({ error: "فقط درخواستِ تأییدنشدهٔ دانش‌آموز قابل رد است." }, 404, origin);
     }
-
-    const adminClient = createClient(supabaseUrl, serviceRoleKey, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
     const { error: deleteError } = await adminClient.auth.admin.deleteUser(targetId);
     if (deleteError) {
       console.error("Pending signup deletion failed", deleteError);
