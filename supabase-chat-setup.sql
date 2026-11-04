@@ -103,3 +103,21 @@ grant select,insert on public.ka_chat_messages to authenticated;
 grant select,insert,update on public.ka_chat_groups to authenticated;
 grant select,insert,delete on public.ka_chat_group_members to authenticated;
 grant select,insert on public.ka_chat_group_messages to authenticated;
+
+
+-- Storage for uploaded profile pictures (safe to rerun)
+insert into storage.buckets (id,name,public,file_size_limit,allowed_mime_types)
+values ('ka-avatars','ka-avatars',true,3145728,array['image/jpeg','image/png','image/webp','image/gif'])
+on conflict (id) do update set public=true,file_size_limit=3145728,allowed_mime_types=array['image/jpeg','image/png','image/webp','image/gif'];
+
+drop policy if exists "chat avatars are publicly readable" on storage.objects;
+create policy "chat avatars are publicly readable" on storage.objects for select using (bucket_id='ka-avatars');
+
+drop policy if exists "users upload own chat avatar" on storage.objects;
+create policy "users upload own chat avatar" on storage.objects for insert to authenticated
+with check (bucket_id='ka-avatars' and (storage.foldername(name))[1]=auth.uid()::text);
+
+drop policy if exists "users update own chat avatar" on storage.objects;
+create policy "users update own chat avatar" on storage.objects for update to authenticated
+using (bucket_id='ka-avatars' and (storage.foldername(name))[1]=auth.uid()::text)
+with check (bucket_id='ka-avatars' and (storage.foldername(name))[1]=auth.uid()::text);
