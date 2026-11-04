@@ -53,7 +53,7 @@ async function loadApprovedUsers(){
   const select=document.createElement("select");select.className="field";select.style.minWidth="115px";
   [["student","دانش‌آموز"],["teacher","معلم"],["admin","مدیر"]].forEach(([v,label])=>{const o=document.createElement("option");o.value=v;o.textContent=label;select.append(o);});
   select.value=user.role;
-  const action=document.createElement("td");
+  const action=document.createElement("td");action.className="actions";
   const save=document.createElement("button");save.className="btn gold";save.textContent="ذخیره";
   if(user.role==="creator"){select.disabled=true;save.disabled=true;current.textContent="Creator (محافظت‌شده)";}
   save.onclick=async()=>{
@@ -62,7 +62,20 @@ async function loadApprovedUsers(){
    if(error){alert("تغییر نقش انجام نشد: "+error.message);save.disabled=false;save.textContent="ذخیره";return;}
    await loadApprovedUsers();
   };
-  roleCell.append(select);action.append(save);tr.append(name,email,current,roleCell,action);body.append(tr);
+  action.append(save);
+  if(user.role==="student"){
+   const revoke=document.createElement("button");revoke.className="btn";revoke.textContent="قطع دسترسی";
+   revoke.title="حساب حذف نمی‌شود؛ فقط تأیید ورود لغو می‌شود.";
+   revoke.onclick=async()=>{
+    if(!confirm("دسترسی این دانش‌آموز لغو شود؟ حسابش حذف نمی‌شود و برای ورود دوباره باید مجدداً تأیید شود."))return;
+    revoke.disabled=true;revoke.textContent="در حال انجام...";
+    const {error}=await window.kaSupabase.rpc("ka_creator_revoke_student_access_v1",{target_id:user.user_id});
+    if(error){alert("لغو دسترسی انجام نشد. ابتدا تابع SQL مربوط را در Supabase اجرا کن.\n"+error.message);revoke.disabled=false;revoke.textContent="قطع دسترسی";return;}
+    await loadApprovedUsers();await loadPendingUsers();await loadCreatorStats();
+   };
+   action.append(revoke);
+  }
+  roleCell.append(select);tr.append(name,email,current,roleCell,action);body.append(tr);
  });
 }
 document.getElementById("refreshRoles")?.addEventListener("click",loadApprovedUsers);
