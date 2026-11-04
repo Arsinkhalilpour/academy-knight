@@ -59,13 +59,13 @@ language sql
 stable
 security definer
 set search_path = ''
-as $
+as $$
  select p.id, p.role::text
  from public.ka_profiles p
  where p.id = any(user_ids)
    and p.approved = true
    and public.ka_chat_is_approved_user((select auth.uid()));
-$;
+$$;
 revoke all on function public.ka_chat_get_roles(uuid[]) from public;
 grant execute on function public.ka_chat_get_roles(uuid[]) to authenticated;
 
