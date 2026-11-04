@@ -43,12 +43,12 @@ language sql
 stable
 security definer
 set search_path = ''
-as $
+as $$
  select exists (
    select 1 from public.ka_profiles p
    where p.id = uid and p.approved = true
  );
-$;
+$$;
 revoke all on function public.ka_chat_is_approved_user(uuid) from public;
 grant execute on function public.ka_chat_is_approved_user(uuid) to authenticated;
 
@@ -58,7 +58,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 begin
  delete from public.ka_chat_messages
  where sender_id = old.id or recipient_id = old.id;
@@ -77,7 +77,7 @@ begin
 
  return old;
 end;
-$;
+$$;
 
 drop trigger if exists ka_chat_cleanup_deleted_academy_user on public.ka_profiles;
 create trigger ka_chat_cleanup_deleted_academy_user
