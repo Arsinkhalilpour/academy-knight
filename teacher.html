@@ -12,7 +12,7 @@
   <div class="field"><label for="academyFile">انتخاب فایل (حداکثر 20 مگابایت)</label><input id="academyFile" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.mp4,.ppt,.pptx,.doc,.docx,.txt"></div>
   <button class="action" id="uploadBtn" type="button">بارگذاری فایل</button>
   <div class="status" id="uploadStatus" role="status"></div>
-</div></section><section class="section"><h2>محتوای اخیر من</h2><table class="table"><thead><tr><th>عنوان</th><th>درس</th><th>نوع فایل</th><th>وضعیت</th></tr></thead><tbody id="fileRows"><tr><td colspan="4" class="empty">در حال دریافت فایل‌ها...</td></tr></tbody></table></section><section class="section"><h2>کارت تلاش دانش‌آموزان ✦</h2><p class="muted">هر ۱۰ کارت تلاش معلم برای یک دانش‌آموز، یک لوح تقدیر صادر می‌کند.</p><div class="field"><label for="awardStudent">انتخاب دانش‌آموز</label><select id="awardStudent"><option value="">در حال دریافت فهرست دانش‌آموزان...</option></select></div><div class="field"><label for="awardNote">یادداشت تشویقی (اختیاری)</label><input id="awardNote" maxlength="500" placeholder="مثلاً تلاش خوب در حل تمرین‌ها"></div><button class="action" id="awardStudentBtn" type="button">ثبت یک کارت تلاش</button><div class="status" id="awardStatus" role="status"></div></section><footer class="footer">KNIGHT ACADEMY · پنل معلم</footer></main>
+</div></section><section class="section"><h2>محتوای اخیر من</h2><table class="table"><thead><tr><th>عنوان</th><th>درس</th><th>نوع فایل</th><th>وضعیت</th></tr></thead><tbody id="fileRows"><tr><td colspan="4" class="empty">در حال دریافت فایل‌ها...</td></tr></tbody></table></section><section class="section" id="teacherMessages"><h2>پیام‌های دانش‌آموزان 💬</h2><p class="muted">پیام‌های ارسال‌شده به خانم سلیمی را ببین و پاسخ بده.</p><button class="action" id="refreshTeacherMessages" type="button">به‌روزرسانی پیام‌ها</button><div id="teacherMessagesList" class="upload" style="text-align:right">در حال دریافت پیام‌ها...</div></section><section class="section"><h2>کارت تلاش دانش‌آموزان ✦</h2><p class="muted">هر ۱۰ کارت تلاش معلم برای یک دانش‌آموز، یک لوح تقدیر صادر می‌کند.</p><div class="field"><label for="awardStudent">انتخاب دانش‌آموز</label><select id="awardStudent"><option value="">در حال دریافت فهرست دانش‌آموزان...</option></select></div><div class="field"><label for="awardNote">یادداشت تشویقی (اختیاری)</label><input id="awardNote" maxlength="500" placeholder="مثلاً تلاش خوب در حل تمرین‌ها"></div><button class="action" id="awardStudentBtn" type="button">ثبت یک کارت تلاش</button><div class="status" id="awardStatus" role="status"></div></section><footer class="footer">KNIGHT ACADEMY · پنل معلم</footer></main>
 <style>body{visibility:hidden}body.auth-ready{visibility:visible}</style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -117,6 +117,29 @@
     });
     await loadFiles(lessons);
     await loadRewardStudents();
+    await loadTeacherMessages();
+    document.getElementById("refreshTeacherMessages").addEventListener("click",loadTeacherMessages);
+    async function loadTeacherMessages(){
+      const box=document.getElementById("teacherMessagesList");box.textContent="در حال دریافت پیام‌ها...";
+      const {data,error}=await client.from("ka_teacher_messages").select("id,student_id,sender_role,message,created_at").order("created_at",{ascending:true}).limit(200);
+      if(error){box.textContent="دریافت پیام‌ها ناموفق بود. تنظیمات چت را در Supabase بررسی کن.";return;}
+      box.innerHTML="";
+      if(!data?.length){box.textContent="هنوز پیامی دریافت نشده است.";return;}
+      data.forEach(m=>{
+        const item=document.createElement("div");item.style.cssText="padding:12px;margin:8px 0;background:var(--panel2);border-radius:10px";
+        const who=document.createElement("b");who.textContent=(m.sender_role==="student"?"پیام دانش‌آموز":"پاسخ معلم")+" · "+m.student_id.slice(0,8);
+        const body=document.createElement("p");body.textContent=m.message;body.style.cssText="white-space:pre-wrap;line-height:2";
+        item.append(who,body);
+        if(m.sender_role==="student"){
+          const input=document.createElement("input");input.maxLength=2000;input.placeholder="پاسخ خانم سلیمی...";input.style.cssText="width:100%;padding:10px;margin:6px 0;background:var(--panel);color:white;border:1px solid var(--line);border-radius:8px;font:inherit";
+          const send=document.createElement("button");send.className="action";send.textContent="ارسال پاسخ";
+          send.onclick=async()=>{const message=input.value.trim();if(!message)return;send.disabled=true;const {error}=await client.from("ka_teacher_messages").insert({student_id:m.student_id,sender_id:session.user.id,sender_role:"teacher",message});if(error){alert("ارسال پاسخ ناموفق بود: "+error.message);send.disabled=false;}else await loadTeacherMessages();};
+          item.append(input,send);
+        }
+        box.append(item);
+      });
+    }
+
     const {count:awardCount,error:awardCountError}=await client.from("ka_effort_awards").select("id",{count:"exact",head:true}).eq("awarded_by",session.user.id);
     if(!awardCountError)document.getElementById("teacherAwardCount").textContent=awardCount??0;
 
