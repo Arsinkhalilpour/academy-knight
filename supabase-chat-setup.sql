@@ -36,6 +36,18 @@ create table if not exists public.ka_chat_group_messages (
  created_at timestamptz not null default now()
 );
 
+-- Private student-to-teacher inbox and replies.
+create table if not exists public.ka_teacher_messages (
+ id uuid primary key default gen_random_uuid(),
+ student_id uuid not null references auth.users(id) on delete cascade,
+ sender_id uuid not null references auth.users(id) on delete cascade,
+ sender_role text not null check(sender_role in ('student','teacher')),
+ message text not null check(char_length(message) between 1 and 2000),
+ created_at timestamptz not null default now()
+);
+create index if not exists ka_teacher_messages_student_created_idx
+ on public.ka_teacher_messages(student_id, created_at);
+
 -- Use a SECURITY DEFINER helper so message INSERT checks are not blocked by RLS on ka_profiles.
 create or replace function public.ka_chat_is_approved_user(uid uuid)
 returns boolean
@@ -118,6 +130,7 @@ alter table public.ka_chat_messages enable row level security;
 alter table public.ka_chat_groups enable row level security;
 alter table public.ka_chat_group_members enable row level security;
 alter table public.ka_chat_group_messages enable row level security;
+alter table public.ka_teacher_messages enable row level security;
 
 drop policy if exists "chat profiles visible to signed users" on public.ka_chat_profiles;
 create policy "chat profiles visible to signed users" on public.ka_chat_profiles for select to authenticated
@@ -164,11 +177,55 @@ drop policy if exists "members send group messages" on public.ka_chat_group_mess
 create policy "members send group messages" on public.ka_chat_group_messages for insert to authenticated
 with check(sender_id=auth.uid() and public.ka_chat_is_member(group_id));
 
+-- Senders can delete only their own direct and group messages.
+drop policy if exists "senders delete own direct messages" on public.ka_chat_messages;
+create policy "senders delete own direct messages" on public.ka_chat_messages
+for delete to authenticated
+using(sender_id = (select auth.uid()) and public.ka_chat_is_approved_user((select auth.uid())));
+
+drop policy if exists "owners delete own groups" on public.ka_chat_groups;
+create policy "owners delete own groups" on public.ka_chat_groups
+for delete to authenticated
+using(created_by = (select auth.uid()) and public.ka_chat_is_approved_user((select auth.uid())));
+
+drop policy if exists "senders delete own group messages" on public.ka_chat_group_messages;
+create policy "senders delete own group messages" on public.ka_chat_group_messages
+for delete to authenticated
+using(sender_id = (select auth.uid()) and public.ka_chat_is_member(group_id));
+
+-- Students can read and send only their own teacher thread; approved teachers can read
+-- student threads and reply as themselves.
+drop policy if exists "students and teachers read teacher messages" on public.ka_teacher_messages;
+create policy "students and teachers read teacher messages" on public.ka_teacher_messages
+for select to authenticated
+using(
+ (student_id = (select auth.uid())
+  and exists(select 1 from public.ka_profiles p where p.id = (select auth.uid()) and p.role::text = 'student' and p.approved = true))
+ or
+ exists(select 1 from public.ka_profiles p where p.id = (select auth.uid()) and p.role::text = 'teacher' and p.approved = true)
+);
+
+drop policy if exists "students and teachers send teacher messages" on public.ka_teacher_messages;
+create policy "students and teachers send teacher messages" on public.ka_teacher_messages
+for insert to authenticated
+with check(
+ sender_id = (select auth.uid())
+ and (
+  (sender_role = 'student' and student_id = (select auth.uid())
+   and exists(select 1 from public.ka_profiles p where p.id = (select auth.uid()) and p.role::text = 'student' and p.approved = true))
+  or
+  (sender_role = 'teacher'
+   and exists(select 1 from public.ka_profiles p where p.id = (select auth.uid()) and p.role::text = 'teacher' and p.approved = true)
+   and exists(select 1 from public.ka_profiles p where p.id = student_id and p.role::text = 'student' and p.approved = true))
+ )
+);
+
 grant select,insert,update on public.ka_chat_profiles to authenticated;
-grant select,insert on public.ka_chat_messages to authenticated;
-grant select,insert,update on public.ka_chat_groups to authenticated;
+grant select,insert,delete on public.ka_chat_messages to authenticated;
+grant select,insert,update,delete on public.ka_chat_groups to authenticated;
 grant select,insert,delete on public.ka_chat_group_members to authenticated;
-grant select,insert on public.ka_chat_group_messages to authenticated;
+grant select,insert,delete on public.ka_chat_group_messages to authenticated;
+grant select,insert on public.ka_teacher_messages to authenticated;
 
 
 -- Storage for uploaded profile pictures (safe to rerun)
