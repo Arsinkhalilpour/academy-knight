@@ -1,5 +1,4 @@
--- آکادمی شوالیه: پیام‌رسان خصوصی و گروهی
--- این اسکریپت را یک‌بار در Supabase > SQL Editor اجرا کن.
+-- Academy Knight chat setup. Run the ENTIRE script in Supabase SQL Editor.
 create table if not exists public.ka_chat_profiles (
  user_id uuid primary key references auth.users(id) on delete cascade,
  display_name text not null check (char_length(display_name) between 2 and 60),
@@ -36,43 +35,7 @@ create table if not exists public.ka_chat_group_messages (
  body text not null check(char_length(body) between 1 and 2000),
  created_at timestamptz not null default now()
 );
-alter table public.ka_chat_profiles enable row level security;
-alter table public.ka_chat_messages enable row level security;
-alter table public.ka_chat_groups enable row level security;
-alter table public.ka_chat_group_members enable row level security;
-alter table public.ka_chat_group_messages enable row level security;
-drop policy if exists "chat profiles visible to signed users" on public.ka_chat_profiles;
-create policy "chat profiles visible to signed users" on public.ka_chat_profiles for select to authenticated using (exists(select 1 from public.ka_profiles p where p.id=auth.uid() and p.approved=true));
-drop policy if exists "users manage own chat profile" on public.ka_chat_profiles;
-create policy "users manage own chat profile" on public.ka_chat_profiles for all to authenticated using(user_id=auth.uid()) with check(user_id=auth.uid() and exists(select 1 from public.ka_profiles p where p.id=auth.uid() and p.approved=true));
-drop policy if exists "participants read direct messages" on public.ka_chat_messages;
-create policy "participants read direct messages" on public.ka_chat_messages for select to authenticated using(sender_id=auth.uid() or recipient_id=auth.uid());
-drop policy if exists "send direct messages as self" on public.ka_chat_messages;
-create policy "send direct messages as self" on public.ka_chat_messages for insert to authenticated with check(sender_id=auth.uid() and exists(select 1 from public.ka_profiles p where p.id=auth.uid() and p.approved=true) and exists(select 1 from public.ka_profiles p where p.id=recipient_id and p.approved=true));
-drop policy if exists "members view groups" on public.ka_chat_groups;
-create policy "members view groups" on public.ka_chat_groups for select to authenticated using(exists(select 1 from public.ka_chat_group_members m where m.group_id=id and m.user_id=auth.uid()));
-drop policy if exists "approved users create groups" on public.ka_chat_groups;
-create policy "approved users create groups" on public.ka_chat_groups for insert to authenticated with check(created_by=auth.uid() and exists(select 1 from public.ka_profiles p where p.id=auth.uid() and p.approved=true));
-drop policy if exists "owner updates group" on public.ka_chat_groups;
-create policy "owner updates group" on public.ka_chat_groups for update to authenticated using(created_by=auth.uid()) with check(created_by=auth.uid());
-drop policy if exists "members see group membership" on public.ka_chat_group_members;
-create policy "members see group membership" on public.ka_chat_group_members for select to authenticated using(exists(select 1 from public.ka_chat_group_members mine where mine.group_id=group_id and mine.user_id=auth.uid()));
-drop policy if exists "group owner adds members" on public.ka_chat_group_members;
-create policy "group owner adds members" on public.ka_chat_group_members for insert to authenticated with check(exists(select 1 from public.ka_chat_groups g where g.id=group_id and g.created_by=auth.uid()) and exists(select 1 from public.ka_profiles p where p.id=user_id and p.approved=true));
-drop policy if exists "group owner removes members" on public.ka_chat_group_members;
-create policy "group owner removes members" on public.ka_chat_group_members for delete to authenticated using(exists(select 1 from public.ka_chat_groups g where g.id=group_id and g.created_by=auth.uid()) or user_id=auth.uid());
-drop policy if exists "members read group messages" on public.ka_chat_group_messages;
-create policy "members read group messages" on public.ka_chat_group_messages for select to authenticated using(exists(select 1 from public.ka_chat_group_members m where m.group_id=ka_chat_group_messages.group_id and m.user_id=auth.uid()));
-drop policy if exists "members send group messages" on public.ka_chat_group_messages;
-create policy "members send group messages" on public.ka_chat_group_messages for insert to authenticated with check(sender_id=auth.uid() and exists(select 1 from public.ka_chat_group_members m where m.group_id=ka_chat_group_messages.group_id and m.user_id=auth.uid()));
-grant select,insert,update on public.ka_chat_profiles to authenticated;
-grant select,insert on public.ka_chat_messages to authenticated;
-grant select,insert,update on public.ka_chat_groups to authenticated;
-grant select,insert,delete on public.ka_chat_group_members to authenticated;
-grant select,insert on public.ka_chat_group_messages to authenticated;
 
-
--- Fix RLS recursion for group membership checks
 create or replace function public.ka_chat_is_member(gid uuid)
 returns boolean language sql stable security definer set search_path=public
 as $$ select exists(select 1 from public.ka_chat_group_members m where m.group_id=gid and m.user_id=auth.uid()) $$;
@@ -83,15 +46,60 @@ revoke all on function public.ka_chat_is_member(uuid) from public;
 revoke all on function public.ka_chat_is_owner(uuid) from public;
 grant execute on function public.ka_chat_is_member(uuid) to authenticated;
 grant execute on function public.ka_chat_is_owner(uuid) to authenticated;
+
+alter table public.ka_chat_profiles enable row level security;
+alter table public.ka_chat_messages enable row level security;
+alter table public.ka_chat_groups enable row level security;
+alter table public.ka_chat_group_members enable row level security;
+alter table public.ka_chat_group_messages enable row level security;
+
+drop policy if exists "chat profiles visible to signed users" on public.ka_chat_profiles;
+create policy "chat profiles visible to signed users" on public.ka_chat_profiles for select to authenticated
+using(exists(select 1 from public.ka_profiles p where p.id=auth.uid() and p.approved=true));
+drop policy if exists "users manage own chat profile" on public.ka_chat_profiles;
+create policy "users manage own chat profile" on public.ka_chat_profiles for all to authenticated
+using(user_id=auth.uid() and exists(select 1 from public.ka_profiles p where p.id=auth.uid() and p.approved=true))
+with check(user_id=auth.uid() and exists(select 1 from public.ka_profiles p where p.id=auth.uid() and p.approved=true));
+
+drop policy if exists "participants read direct messages" on public.ka_chat_messages;
+create policy "participants read direct messages" on public.ka_chat_messages for select to authenticated
+using(sender_id=auth.uid() or recipient_id=auth.uid());
+drop policy if exists "send direct messages as self" on public.ka_chat_messages;
+create policy "send direct messages as self" on public.ka_chat_messages for insert to authenticated
+with check(sender_id=auth.uid()
+ and exists(select 1 from public.ka_profiles p where p.id=auth.uid() and p.approved=true)
+ and exists(select 1 from public.ka_profiles p where p.id=recipient_id and p.approved=true));
+
 drop policy if exists "members view groups" on public.ka_chat_groups;
-create policy "members view groups" on public.ka_chat_groups for select to authenticated using(public.ka_chat_is_member(id));
+create policy "members view groups" on public.ka_chat_groups for select to authenticated
+using(public.ka_chat_is_member(id));
+drop policy if exists "approved users create groups" on public.ka_chat_groups;
+create policy "approved users create groups" on public.ka_chat_groups for insert to authenticated
+with check(created_by=auth.uid() and exists(select 1 from public.ka_profiles p where p.id=auth.uid() and p.approved=true));
+drop policy if exists "owner updates group" on public.ka_chat_groups;
+create policy "owner updates group" on public.ka_chat_groups for update to authenticated
+using(created_by=auth.uid()) with check(created_by=auth.uid());
+
 drop policy if exists "members see group membership" on public.ka_chat_group_members;
-create policy "members see group membership" on public.ka_chat_group_members for select to authenticated using(public.ka_chat_is_member(group_id));
+create policy "members see group membership" on public.ka_chat_group_members for select to authenticated
+using(public.ka_chat_is_member(group_id));
 drop policy if exists "group owner adds members" on public.ka_chat_group_members;
-create policy "group owner adds members" on public.ka_chat_group_members for insert to authenticated with check(public.ka_chat_is_owner(group_id) and exists(select 1 from public.ka_profiles p where p.id=user_id and p.approved=true));
+create policy "group owner adds members" on public.ka_chat_group_members for insert to authenticated
+with check(public.ka_chat_is_owner(group_id)
+ and exists(select 1 from public.ka_profiles p where p.id=user_id and p.approved=true));
 drop policy if exists "group owner removes members" on public.ka_chat_group_members;
-create policy "group owner removes members" on public.ka_chat_group_members for delete to authenticated using(public.ka_chat_is_owner(group_id) or user_id=auth.uid());
+create policy "group owner removes members" on public.ka_chat_group_members for delete to authenticated
+using(public.ka_chat_is_owner(group_id) or user_id=auth.uid());
+
 drop policy if exists "members read group messages" on public.ka_chat_group_messages;
-create policy "members read group messages" on public.ka_chat_group_messages for select to authenticated using(public.ka_chat_is_member(group_id));
+create policy "members read group messages" on public.ka_chat_group_messages for select to authenticated
+using(public.ka_chat_is_member(group_id));
 drop policy if exists "members send group messages" on public.ka_chat_group_messages;
-create policy "members send group messages" on public.ka_chat_group_messages for insert to authenticated with check(sender_id=auth.uid() and public.ka_chat_is_member(group_id));
+create policy "members send group messages" on public.ka_chat_group_messages for insert to authenticated
+with check(sender_id=auth.uid() and public.ka_chat_is_member(group_id));
+
+grant select,insert,update on public.ka_chat_profiles to authenticated;
+grant select,insert on public.ka_chat_messages to authenticated;
+grant select,insert,update on public.ka_chat_groups to authenticated;
+grant select,insert,delete on public.ka_chat_group_members to authenticated;
+grant select,insert on public.ka_chat_group_messages to authenticated;
