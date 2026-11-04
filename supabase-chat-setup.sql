@@ -52,6 +52,24 @@ $$;
 revoke all on function public.ka_chat_is_approved_user(uuid) from public;
 grant execute on function public.ka_chat_is_approved_user(uuid) to authenticated;
 
+-- Return roles only for approved chat users, without exposing the full academy profile table.
+create or replace function public.ka_chat_get_roles(user_ids uuid[])
+returns table(user_id uuid, role text)
+language sql
+stable
+security definer
+set search_path = ''
+as $
+ select p.id, p.role::text
+ from public.ka_profiles p
+ where p.id = any(user_ids)
+   and p.approved = true
+   and public.ka_chat_is_approved_user((select auth.uid()));
+$;
+revoke all on function public.ka_chat_get_roles(uuid[]) from public;
+grant execute on function public.ka_chat_get_roles(uuid[]) to authenticated;
+
+
 -- Remove chat data even if an account is removed from the academy profile table.
 create or replace function public.ka_chat_cleanup_deleted_academy_user()
 returns trigger
