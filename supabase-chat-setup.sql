@@ -64,6 +64,24 @@ $$;
 revoke all on function public.ka_chat_is_approved_user(uuid) from public;
 grant execute on function public.ka_chat_is_approved_user(uuid) to authenticated;
 
+-- Role-aware security helper for policies that need to verify another account.
+create or replace function public.ka_chat_user_has_role(uid uuid, expected_role text)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $
+ select exists (
+   select 1 from public.ka_profiles p
+   where p.id = uid
+     and p.approved = true
+     and p.role::text = expected_role
+ );
+$;
+revoke all on function public.ka_chat_user_has_role(uuid, text) from public;
+grant execute on function public.ka_chat_user_has_role(uuid, text) to authenticated;
+
 -- Return roles only for approved chat users, without exposing the full academy profile table.
 create or replace function public.ka_chat_get_roles(user_ids uuid[])
 returns table(user_id uuid, role text)
@@ -199,10 +217,8 @@ drop policy if exists "students and teachers read teacher messages" on public.ka
 create policy "students and teachers read teacher messages" on public.ka_teacher_messages
 for select to authenticated
 using(
- (student_id = (select auth.uid())
-  and exists(select 1 from public.ka_profiles p where p.id = (select auth.uid()) and p.role::text = 'student' and p.approved = true))
- or
- exists(select 1 from public.ka_profiles p where p.id = (select auth.uid()) and p.role::text = 'teacher' and p.approved = true)
+ (student_id = (select auth.uid()) and public.ka_chat_user_has_role((select auth.uid()), 'student'))
+ or public.ka_chat_user_has_role((select auth.uid()), 'teacher')
 );
 
 drop policy if exists "students and teachers send teacher messages" on public.ka_teacher_messages;
@@ -212,11 +228,11 @@ with check(
  sender_id = (select auth.uid())
  and (
   (sender_role = 'student' and student_id = (select auth.uid())
-   and exists(select 1 from public.ka_profiles p where p.id = (select auth.uid()) and p.role::text = 'student' and p.approved = true))
+   and public.ka_chat_user_has_role((select auth.uid()), 'student'))
   or
   (sender_role = 'teacher'
-   and exists(select 1 from public.ka_profiles p where p.id = (select auth.uid()) and p.role::text = 'teacher' and p.approved = true)
-   and exists(select 1 from public.ka_profiles p where p.id = student_id and p.role::text = 'student' and p.approved = true))
+   and public.ka_chat_user_has_role((select auth.uid()), 'teacher')
+   and public.ka_chat_user_has_role(student_id, 'student'))
  )
 );
 
