@@ -237,7 +237,7 @@ begin
   select p.role::text into target_role
   from public.ka_profiles p
   where p.id = target_id and p.approved is true;
-  if target_role not in ('student', 'teacher') then
+  if target_role is null or target_role not in ('student', 'teacher') then
     raise exception 'حساب هدف پیدا نشد یا قابل مدیریت نیست.';
   end if;
   execute format('update public.ka_profiles set role = %L where id = $1', new_role) using target_id;
