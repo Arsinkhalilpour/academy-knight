@@ -47,6 +47,13 @@ Deno.serve(async (req: Request) => {
     if (!question || question.length > 1500) {
       return Response.json({ error: "سؤال باید بین ۱ تا ۱۵۰۰ نویسه باشد." }, { status: 400, headers: cors });
     }
+    const history = Array.isArray(body.history) ? body.history.slice(-12) : [];
+    const contextMessages = history
+      .filter((item: any) =>
+        item && (item.role === "user" || item.role === "assistant") &&
+        typeof item.content === "string" && item.content.length > 0 && item.content.length <= 3000
+      )
+      .map((item: any) => ({ role: item.role, content: item.content }));
 
     const systemPrompt = `تو «معلم هوشمند آکادمی شوالیه» هستی؛ یک معلم خصوصی بسیار دقیق، صبور و خوش‌بیان برای دانش‌آموز پایه پنجم دبستان ایران.
 
@@ -75,6 +82,7 @@ Deno.serve(async (req: Request) => {
         model: "openai/gpt-oss-20b",
         messages: [
           { role: "system", content: systemPrompt },
+          ...contextMessages,
           { role: "user", content: question },
         ],
         temperature: 0.25,
