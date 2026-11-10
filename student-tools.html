@@ -152,10 +152,22 @@ document.getElementById("askForm").addEventListener("submit",async(e)=>{
  const add=(text,kind)=>{const d=document.createElement("div");d.className="bubble "+kind;d.textContent=text;log.append(d);log.scrollTop=log.scrollHeight;};
  add(question,"me");input.value="";button.disabled=true;note.textContent="معلم هوشمند در حال فکر کردن است...";
  try {
+  const {data:previousTurns, error:historyError}=await window.academyClient
+    .from("ka_tutor_history")
+    .select("question,answer")
+    .eq("user_id",window.knightStudentId)
+    .eq("conversation_id",activeTutorConversationId)
+    .order("created_at",{ascending:true})
+    .limit(12);
+  if(historyError)throw new Error("دریافت سابقه این گفت‌وگو ناموفق بود: "+historyError.message);
+  const history=(previousTurns||[]).flatMap(item=>[
+    {role:"user",content:item.question},
+    {role:"assistant",content:item.answer}
+  ]).slice(-12);
   const { data, error } =
     await window.academyClient.functions.invoke(
       "knight-tutor",
-      { body: { question } }
+      { body: { question, history } }
     );
 
   if (error) {
