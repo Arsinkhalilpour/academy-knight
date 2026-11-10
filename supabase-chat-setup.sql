@@ -260,3 +260,23 @@ drop policy if exists "users update own chat avatar" on storage.objects;
 create policy "users update own chat avatar" on storage.objects for update to authenticated
 using (bucket_id='ka-avatars' and (storage.foldername(name))[1]=auth.uid()::text)
 with check (bucket_id='ka-avatars' and (storage.foldername(name))[1]=auth.uid()::text);
+
+
+-- Saved AI tutor conversation history (one row per question and answer).
+create table if not exists public.ka_tutor_history (
+ id uuid primary key default gen_random_uuid(),
+ user_id uuid not null references auth.users(id) on delete cascade,
+ question text not null check(char_length(question) between 1 and 1500),
+ answer text not null check(char_length(answer) between 1 and 12000),
+ created_at timestamptz not null default now()
+);
+create index if not exists ka_tutor_history_user_created_idx
+ on public.ka_tutor_history(user_id, created_at desc);
+alter table public.ka_tutor_history enable row level security;
+drop policy if exists "students read own tutor history" on public.ka_tutor_history;
+create policy "students read own tutor history" on public.ka_tutor_history
+ for select to authenticated using(user_id=(select auth.uid()));
+drop policy if exists "students save own tutor history" on public.ka_tutor_history;
+create policy "students save own tutor history" on public.ka_tutor_history
+ for insert to authenticated with check(user_id=(select auth.uid()));
+grant select,insert on public.ka_tutor_history to authenticated;
