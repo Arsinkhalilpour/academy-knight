@@ -18,7 +18,8 @@ body.tools-view main{max-width:900px}body.tools-view main>.section-title,body.to
 <header><div class="brand">آکادمی شوالیه <small>معلم هوشمند و ارتباط با معلم</small></div><div class="user"><span id="studentName">دانش‌آموز</span>　<a href="student.html" class="logout" style="display:inline-block;text-decoration:none;padding:8px 12px;border-radius:9px">بازگشت به صفحه اصلی</a>　<button class="logout" id="logout">خروج</button></div></header>
 <main><div id="status" class="status"></div>
 <h2 class="section-title" id="tutor">✦ معلم هوشمند</h2><section class="tutor">
-<p>سؤالت را درباره درس‌هایت بنویس تا معلم هوشمند راهنمایی‌ات کند.</p>
+<p>هر گفت‌وگو جداگانه ذخیره می‌شود. برای شروع موضوع تازه، «چت جدید» را بزن.</p>
+<div class="askrow" style="margin:10px 0;flex-wrap:wrap"><button id="newTutorChat" type="button" style="background:#e9bd5b;color:#172033;font-weight:800">＋ چت جدید</button><span id="activeChatTitle" style="color:#e8c66f;font-size:11px;align-self:center">گفت‌وگوی جدید</span></div>
 <div id="chatlog" class="chatlog"><div class="history-empty">سلام! چه چیزی می‌خواهی یاد بگیری؟ 😊</div></div>
 <form id="askForm" class="askrow"><input id="question" type="text" maxlength="1500" placeholder="سؤالت را اینجا بنویس..." required><button id="askButton" type="submit">ارسال</button></form>
 <p id="tutorStatus" aria-live="polite"></p><h3>گفت‌وگوهای قبلی</h3><div id="tutorHistory" class="history-list"><div class="history-empty">در حال دریافت تاریخچه...</div></div>
@@ -44,27 +45,45 @@ const SUPABASE_KEY="sb_publishable_kybJ2B3BKoT2fScPaz6xRQ_eBOSwiqi";
   if(!profile||profile.role!=="student"||profile.approved!==true){await client.auth.signOut();location.replace("index.html?auth=denied");return}
   document.getElementById("studentName").textContent=session.user.user_metadata?.full_name||session.user.email;
   window.knightStudentId=session.user.id;
+  let activeTutorConversationId=crypto.randomUUID();
+  const activeTitle=document.getElementById("activeChatTitle");
+  const renderTutorConversation=(rows)=>{
+   const log=document.getElementById("chatlog");log.innerHTML="";
+   if(!rows?.length){log.innerHTML='<div class="history-empty">سلام! چه چیزی می‌خواهی یاد بگیری؟ 😊</div>';return;}
+   rows.forEach(item=>{
+    const u=document.createElement("div");u.className="bubble me";u.textContent=item.question;
+    const a=document.createElement("div");a.className="bubble ai";a.textContent=item.answer;
+    log.append(u,a);
+   });
+   log.scrollTop=log.scrollHeight;
+  };
   window.loadTutorHistory=async function(){
    const box=document.getElementById("tutorHistory");
-   const {data,error}=await client.from("ka_tutor_history").select("id,question,answer,created_at").eq("user_id",session.user.id).order("created_at",{ascending:false}).limit(50);
-   if(error){box.innerHTML='<div class="history-empty">برای فعال‌شدن ذخیرهٔ گفت‌وگوها، مدیر باید یک‌بار فایل تنظیمات تاریخچه را در Supabase اجرا کند.</div>';return}
+   const {data,error}=await client.from("ka_tutor_history").select("id,conversation_id,question,answer,created_at").eq("user_id",session.user.id).order("created_at",{ascending:false}).limit(300);
+   if(error){box.innerHTML='<div class="history-empty">برای فعال‌شدن تاریخچهٔ چت‌ها، مدیر باید نسخه جدید فایل تنظیمات را در Supabase اجرا کند.</div>';return}
    box.innerHTML="";
    if(!data?.length){box.innerHTML='<div class="history-empty">هنوز گفت‌وگویی ذخیره نشده است.</div>';return}
-   data.forEach(item=>{
+   const groups=new Map();
+   data.forEach(item=>{const id=item.conversation_id;if(!id)return;if(!groups.has(id))groups.set(id,[]);groups.get(id).push(item);});
+   groups.forEach((rows,id)=>{
+    const latest=rows[0],first=rows[rows.length-1];
     const b=document.createElement("button");b.type="button";b.className="history-item";
-    const title=document.createElement("span");title.textContent=item.question;
-    const meta=document.createElement("small");meta.textContent=new Date(item.created_at).toLocaleString("fa-IR");
+    const title=document.createElement("span");title.textContent=first.question.slice(0,65)+(first.question.length>65?"…":"");
+    const meta=document.createElement("small");meta.textContent=rows.length+" پرسش · "+new Date(latest.created_at).toLocaleString("fa-IR");
     b.append(title,meta);
     b.addEventListener("click",()=>{
-     const log=document.getElementById("chatlog");log.innerHTML="";
-     const u=document.createElement("div");u.className="bubble me";u.textContent=item.question;
-     const a=document.createElement("div");a.className="bubble ai";a.textContent=item.answer;
-     log.append(u,a);log.scrollTop=log.scrollHeight;
-     document.getElementById("tutorStatus").textContent="گفت‌وگوی ذخیره‌شده نمایش داده شد.";
+     activeTutorConversationId=id;activeTitle.textContent=title.textContent;
+     renderTutorConversation([...rows].reverse());
+     document.getElementById("tutorStatus").textContent="گفت‌وگوی ذخیره‌شده باز شد.";
     });
     box.append(b);
    });
   };
+  document.getElementById("newTutorChat").addEventListener("click",()=>{
+   activeTutorConversationId=crypto.randomUUID();activeTitle.textContent="گفت‌وگوی جدید";
+   renderTutorConversation([]);document.getElementById("tutorStatus").textContent="چت جدید آماده است.";
+   document.getElementById("question").focus();
+  });
   await window.loadTutorHistory();
   const chatLog=document.getElementById("teacherChatLog"),chatStatus=document.getElementById("teacherChatStatus");
   const showChatStatus=(msg)=>{chatStatus.textContent=msg;};
@@ -172,7 +191,7 @@ document.getElementById("askForm").addEventListener("submit",async(e)=>{
   }
 
   add(data.answer, "ai");
-  const {error:saveError}=await window.academyClient.from("ka_tutor_history").insert({user_id:window.knightStudentId,question,answer:data.answer});
+  const {error:saveError}=await window.academyClient.from("ka_tutor_history").insert({user_id:window.knightStudentId,conversation_id:activeTutorConversationId,question,answer:data.answer});
   if(saveError){note.textContent="پاسخ دریافت شد، اما تاریخچه ذخیره نشد. تنظیمات پایگاه داده را بررسی کن.";}
   else{note.textContent="گفت‌وگو ذخیره شد ✓";await window.loadTutorHistory();}
 
