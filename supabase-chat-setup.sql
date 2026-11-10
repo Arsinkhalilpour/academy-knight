@@ -262,14 +262,21 @@ using (bucket_id='ka-avatars' and (storage.foldername(name))[1]=auth.uid()::text
 with check (bucket_id='ka-avatars' and (storage.foldername(name))[1]=auth.uid()::text);
 
 
--- Saved AI tutor conversation history (one row per question and answer).
+-- Saved AI tutor conversation history (one row per question and answer, grouped by conversation).
 create table if not exists public.ka_tutor_history (
  id uuid primary key default gen_random_uuid(),
  user_id uuid not null references auth.users(id) on delete cascade,
+ conversation_id uuid not null default gen_random_uuid(),
  question text not null check(char_length(question) between 1 and 1500),
  answer text not null check(char_length(answer) between 1 and 12000),
  created_at timestamptz not null default now()
 );
+-- Safe migration for installations that already have the older history table.
+alter table public.ka_tutor_history
+ add column if not exists conversation_id uuid default gen_random_uuid();
+update public.ka_tutor_history set conversation_id=gen_random_uuid() where conversation_id is null;
+alter table public.ka_tutor_history alter column conversation_id set default gen_random_uuid();
+alter table public.ka_tutor_history alter column conversation_id set not null;
 create index if not exists ka_tutor_history_user_created_idx
  on public.ka_tutor_history(user_id, created_at desc);
 alter table public.ka_tutor_history enable row level security;
