@@ -45,7 +45,7 @@ const SUPABASE_KEY="sb_publishable_kybJ2B3BKoT2fScPaz6xRQ_eBOSwiqi";
   if(!profile||profile.role!=="student"||profile.approved!==true){await client.auth.signOut();location.replace("index.html?auth=denied");return}
   document.getElementById("studentName").textContent=session.user.user_metadata?.full_name||session.user.email;
   window.knightStudentId=session.user.id;
-  let activeTutorConversationId=crypto.randomUUID();
+  window.window.activeTutorConversationId=crypto.randomUUID();
   const activeTitle=document.getElementById("activeChatTitle");
   const renderTutorConversation=(rows)=>{
    const log=document.getElementById("chatlog");log.innerHTML="";
@@ -72,7 +72,7 @@ const SUPABASE_KEY="sb_publishable_kybJ2B3BKoT2fScPaz6xRQ_eBOSwiqi";
     const meta=document.createElement("small");meta.textContent=rows.length+" پرسش · "+new Date(latest.created_at).toLocaleString("fa-IR");
     b.append(title,meta);
     b.addEventListener("click",()=>{
-     activeTutorConversationId=id;activeTitle.textContent=title.textContent;
+     window.activeTutorConversationId=id;activeTitle.textContent=title.textContent;
      renderTutorConversation([...rows].reverse());
      document.getElementById("tutorStatus").textContent="گفت‌وگوی ذخیره‌شده باز شد.";
     });
@@ -80,7 +80,7 @@ const SUPABASE_KEY="sb_publishable_kybJ2B3BKoT2fScPaz6xRQ_eBOSwiqi";
    });
   };
   document.getElementById("newTutorChat").addEventListener("click",()=>{
-   activeTutorConversationId=crypto.randomUUID();activeTitle.textContent="گفت‌وگوی جدید";
+   window.activeTutorConversationId=crypto.randomUUID();activeTitle.textContent="گفت‌وگوی جدید";
    renderTutorConversation([]);document.getElementById("tutorStatus").textContent="چت جدید آماده است.";
    document.getElementById("question").focus();
   });
@@ -156,7 +156,7 @@ document.getElementById("askForm").addEventListener("submit",async(e)=>{
     .from("ka_tutor_history")
     .select("question,answer")
     .eq("user_id",window.knightStudentId)
-    .eq("conversation_id",activeTutorConversationId)
+    .eq("conversation_id",window.activeTutorConversationId)
     .order("created_at",{ascending:true})
     .limit(12);
   if(historyError)throw new Error("دریافت سابقه این گفت‌وگو ناموفق بود: "+historyError.message);
@@ -203,7 +203,7 @@ document.getElementById("askForm").addEventListener("submit",async(e)=>{
   }
 
   add(data.answer, "ai");
-  const {error:saveError}=await window.academyClient.from("ka_tutor_history").insert({user_id:window.knightStudentId,conversation_id:activeTutorConversationId,question,answer:data.answer});
+  const {error:saveError}=await window.academyClient.from("ka_tutor_history").insert({user_id:window.knightStudentId,conversation_id:window.activeTutorConversationId,question,answer:data.answer});
   if(saveError){note.textContent="پاسخ دریافت شد، اما تاریخچه ذخیره نشد. تنظیمات پایگاه داده را بررسی کن.";}
   else{note.textContent="گفت‌وگو ذخیره شد ✓";await window.loadTutorHistory();}
 
