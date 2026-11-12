@@ -287,3 +287,24 @@ drop policy if exists "students save own tutor history" on public.ka_tutor_histo
 create policy "students save own tutor history" on public.ka_tutor_history
  for insert to authenticated with check(user_id=(select auth.uid()));
 grant select,insert on public.ka_tutor_history to authenticated;
+
+
+-- Personal AI tutor memory: each student can manage only their own memory.
+create table if not exists public.ka_tutor_memory (
+ user_id uuid primary key references auth.users(id) on delete cascade,
+ memory_text text not null default '' check(char_length(memory_text)<=500),
+ updated_at timestamptz not null default now()
+);
+alter table public.ka_tutor_memory enable row level security;
+drop policy if exists "students manage own tutor memory" on public.ka_tutor_memory;
+create policy "students manage own tutor memory" on public.ka_tutor_memory
+ for all to authenticated
+ using(user_id=(select auth.uid()))
+ with check(user_id=(select auth.uid()));
+grant select,insert,update,delete on public.ka_tutor_memory to authenticated;
+
+-- Students may delete only their own saved AI tutor conversations.
+drop policy if exists "students delete own tutor history" on public.ka_tutor_history;
+create policy "students delete own tutor history" on public.ka_tutor_history
+ for delete to authenticated using(user_id=(select auth.uid()));
+grant delete on public.ka_tutor_history to authenticated;
