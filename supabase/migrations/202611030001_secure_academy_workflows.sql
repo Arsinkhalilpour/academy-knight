@@ -141,7 +141,7 @@ returns void
 language plpgsql
 security definer
 set search_path = public, pg_temp
-as $
+as $$
 begin
   if not exists (
     select 1 from public.ka_profiles p
@@ -156,7 +156,7 @@ begin
     raise exception 'دانش‌آموز تأییدشده پیدا نشد یا دسترسی او قبلاً لغو شده است.';
   end if;
 end;
-$;
+$$;
 
 -- Creator can add a published or draft lesson without exposing table write privileges.
 create or replace function public.ka_creator_create_lesson(
