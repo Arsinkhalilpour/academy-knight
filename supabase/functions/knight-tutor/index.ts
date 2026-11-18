@@ -47,6 +47,16 @@ Deno.serve(async (req: Request) => {
     if (!question || question.length > 1500) {
       return Response.json({ error: "سؤال باید بین ۱ تا ۱۵۰۰ نویسه باشد." }, { status: 400, headers: cors });
     }
+
+    // Enforce a per-student hourly request limit in the database.
+    const { data: rateAllowed, error: rateError } = await supabase.rpc("ka_tutor_consume_rate_limit");
+    if (rateError) {
+      console.error("Tutor rate-limit check failed", rateError);
+      return Response.json({ error: "بررسی محدودیت درخواست‌ها موقتاً ناموفق بود؛ بعداً تلاش کن." }, { status: 503, headers: cors });
+    }
+    if (rateAllowed !== true) {
+      return Response.json({ error: "سهمیهٔ معلم هوشمند پر شده است. یک ساعت دیگر دوباره تلاش کن." }, { status: 429, headers: cors });
+    }
     const history = Array.isArray(body.history) ? body.history.slice(-12) : [];
     const contextMessages = history
       .filter((item: any) =>
