@@ -1,248 +1,609 @@
 <!doctype html>
 <html lang="fa" dir="rtl">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101827">
-<title>معلم هوشمند و چت با معلم | آکادمی شوالیه</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101827">
+<title>معلم هوشمند | آکادمی شوالیه</title>
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--ink:#172033;--muted:#687386;--line:#e5e9f0;--paper:#f5f7fb;--gold:#e9bd5b;--navy:#101a2b}
-*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Vazirmatn,Tahoma,sans-serif;visibility:hidden}body.ready{visibility:visible}
-header{background:#fff;border-bottom:1px solid var(--line);padding:15px max(20px,calc((100% - 1100px)/2));display:flex;justify-content:space-between;align-items:center;gap:12px}.brand{font-weight:800;font-size:18px}.brand small{display:block;color:var(--muted);font-size:10px;font-weight:500}.user{font-size:12px;color:var(--muted)}
-main{width:min(1100px,calc(100% - 32px));margin:26px auto 60px}.hero{background:radial-gradient(circle at 90% 0,#344765,transparent 35%),linear-gradient(120deg,#0d1524,#1c2b43);color:#fff;border:1px solid #33445f;border-radius:22px;padding:25px;display:flex;justify-content:space-between;align-items:center;gap:18px;box-shadow:0 16px 35px #17203318}.hero h1{margin:0 0 8px;font-size:23px}.hero p{margin:0;color:#d0d8e5;font-size:13px;line-height:2}.emblem{width:70px;height:70px;flex:0 0 70px;border:1px solid #9a7a3e;border-radius:20px;display:grid;place-items:center;color:var(--gold);font-size:35px;background:#ffffff0b}.gold{color:var(--gold)}
-.section-title{margin:28px 0 13px;font-size:17px}.subjects{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:13px}.subject,.lesson,.empty{background:#fff;border:1px solid var(--line);border-radius:15px;padding:17px}.subject{display:flex;align-items:center;gap:12px;font-weight:700}.tool-link{text-decoration:none;color:inherit;cursor:pointer;transition:transform .15s,box-shadow .15s}.tool-link:hover{transform:translateY(-2px);box-shadow:0 8px 22px #17203318}.subject span{width:38px;height:38px;border-radius:12px;background:#edf1f7;display:grid;place-items:center;font-size:20px}.subject small{display:block;color:var(--muted);font-size:10px;font-weight:400;margin-top:3px}.lessons{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:13px}.lesson h3{font-size:14px;margin:0 0 7px}.lesson p{font-size:11px;color:var(--muted);line-height:1.9;margin:0}.tag{display:inline-block;margin-top:12px;padding:5px 9px;border-radius:20px;background:#edf4ff;color:#315d9a;font-size:10px}.empty{color:var(--muted);font-size:12px;line-height:2;grid-column:1/-1}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:13px}.stat{background:#fff;border:1px solid var(--line);border-radius:15px;padding:16px}.stat b{display:block;font-size:23px;color:#263c5c}.stat small{color:var(--muted);font-size:11px}
-button{font:inherit;border:0;border-radius:9px;padding:9px 13px;cursor:pointer}.logout{background:#edf0f5;color:#28364c;font-size:11px}.status{margin:14px 0;padding:12px;background:#fff3d7;color:#75571b;border-radius:10px;font-size:12px;display:none}.tutor{background:#101a2b;color:#fff;border-radius:18px;padding:18px;margin-top:12px}.tutor p{color:#cbd5e1;font-size:12px;line-height:2}.chatlog{height:220px;overflow:auto;background:#0b1321;border:1px solid #34445e;border-radius:12px;padding:12px;margin:12px 0}.bubble{max-width:90%;padding:10px 12px;border-radius:12px;margin:8px 0;font-size:12px;line-height:2;white-space:pre-wrap}.bubble.ai{background:#26364e;color:#fff;margin-left:auto}.bubble.me{background:#f1dcae;color:#1c2636;margin-right:auto}.askrow{display:flex;gap:8px}.askrow input{flex:1;min-width:0;border:1px solid #52627b;border-radius:10px;padding:11px;font:inherit;font-size:12px}.askrow button{background:#e9bd5b;color:#172033;font-weight:800}.askrow button:disabled{opacity:.55}.history-list{display:grid;gap:8px;margin-top:10px}.history-row{display:flex;gap:7px;align-items:stretch}.history-item{display:block;flex:1;min-width:0;text-align:right;background:#1b2b43;color:#fff;border:1px solid #52627b;padding:11px;border-radius:10px}.history-delete{background:#6b2834;color:#fff;font-size:11px;padding:8px 10px;border-radius:9px}.history-item small{display:block;color:#e8c66f;margin-top:4px;font-size:10px}.history-empty{font-size:11px;color:#cbd5e1;padding:8px}
-@media(max-width:600px){header{align-items:flex-start}.hero{padding:19px}.hero h1{font-size:19px}.emblem{width:55px;height:55px;flex-basis:55px}}
-body.tools-view main{max-width:900px}body.tools-view main>.section-title,body.tools-view main>.tutor{display:block}body.tools-view main>.status{display:none}body.tools-view main>.status[style*="block"]{display:block}</style></head>
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Vazirmatn,Tahoma,sans-serif;visibility:hidden}
+body.ready{visibility:visible}
+header{background:#fff;border-bottom:1px solid var(--line);padding:15px max(20px,calc((100% - 1100px)/2));display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{font-weight:800;font-size:18px}
+.brand small{display:block;color:var(--muted);font-size:10px;font-weight:500}
+.user{font-size:12px;color:var(--muted)}
+main{width:min(1100px,calc(100% - 32px));margin:26px auto 60px}
+.section-title{margin:28px 0 13px;font-size:17px}
+button{font:inherit;border:0;border-radius:9px;padding:9px 13px;cursor:pointer}
+.logout{background:#edf0f5;color:#28364c;font-size:11px}
+.status{margin:14px 0;padding:12px;background:#fff3d7;color:#75571b;border-radius:10px;font-size:12px;display:none}
+.tutor{background:#101a2b;color:#fff;border-radius:18px;padding:18px;margin-top:12px}
+.tutor p{color:#cbd5e1;font-size:12px;line-height:2}
+.chatlog{height:220px;overflow:auto;background:#0b1321;border:1px solid #34445e;border-radius:12px;padding:12px;margin:12px 0}
+.bubble{max-width:90%;padding:10px 12px;border-radius:12px;margin:8px 0;font-size:12px;line-height:2;white-space:pre-wrap}
+.bubble.ai{background:#26364e;color:#fff;margin-left:auto}
+.bubble.me{background:#f1dcae;color:#1c2636;margin-right:auto}
+.askrow{display:flex;gap:8px}
+.askrow input{flex:1;min-width:0;border:1px solid #52627b;border-radius:10px;padding:11px;font:inherit;font-size:12px}
+.askrow button{background:#e9bd5b;color:#172033;font-weight:800}
+.askrow button:disabled{opacity:.55}
+.history-list{display:grid;gap:8px;margin-top:10px}
+.history-row{display:flex;gap:7px;align-items:stretch}
+.history-item{display:block;flex:1;min-width:0;text-align:right;background:#1b2b43;color:#fff;border:1px solid #52627b;padding:11px;border-radius:10px}
+.history-delete{background:#6b2834;color:#fff;font-size:11px;padding:8px 10px;border-radius:9px}
+.history-item small{display:block;color:#e8c66f;margin-top:4px;font-size:10px}
+.history-empty{font-size:11px;color:#cbd5e1;padding:8px}
+@media(max-width:600px){
+header{align-items:flex-start;flex-wrap:wrap}
+.user{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+}
+body.tools-view main{max-width:900px}
+body.tools-view main>.section-title,body.tools-view main>.tutor{display:block}
+body.tools-view main>.status{display:none}
+body.tools-view main>.status[style*="block"]{display:block}
+</style>
+</head>
+
 <body class="tools-view">
-<header><div class="brand">آکادمی شوالیه <small>معلم هوشمند و ارتباط با معلم</small></div><div class="user"><span id="studentName">دانش‌آموز</span>　<a href="student.html" class="logout" style="display:inline-block;text-decoration:none;padding:8px 12px;border-radius:9px">بازگشت به صفحه اصلی</a>　<button class="logout" id="logout">خروج</button></div></header>
-<main><div id="status" class="status"></div>
-<h2 class="section-title" id="tutor">✦ معلم هوشمند</h2><section class="tutor">
+
+<header>
+<div class="brand">
+آکادمی شوالیه
+<small>معلم هوشمند و پیام‌رسان</small>
+</div>
+
+<div class="user">
+<span id="studentName">دانش‌آموز</span>
+
+<a href="student.html" class="logout" style="display:inline-block;text-decoration:none;padding:8px 12px;border-radius:9px">
+بازگشت به صفحه اصلی
+</a>
+
+<a href="./chat.html" class="logout" style="display:inline-block;text-decoration:none;padding:8px 12px;border-radius:9px;background:#e9bd5b;color:#172033">
+💬 پیام‌رسان
+</a>
+
+<button class="logout" id="logout">خروج</button>
+</div>
+</header>
+
+<main>
+<div id="status" class="status"></div>
+
+<h2 class="section-title" id="tutor">✦ معلم هوشمند</h2>
+
+<section class="tutor">
+
 <p>هر گفت‌وگو جداگانه ذخیره می‌شود. برای شروع موضوع تازه، «چت جدید» را بزن.</p>
-<div class="askrow" style="margin:10px 0;flex-wrap:wrap"><button id="newTutorChat" type="button" style="background:#e9bd5b;color:#172033;font-weight:800">＋ چت جدید</button><span id="activeChatTitle" style="color:#e8c66f;font-size:11px;align-self:center">گفت‌وگوی جدید</span></div>
-<div id="chatlog" class="chatlog"><div class="history-empty">سلام! چه چیزی می‌خواهی یاد بگیری؟ 😊</div></div>
- <div style="margin:12px 0;padding:12px;background:#17263b;border:1px solid #52627b;border-radius:12px">
-  <strong style="color:#e8c66f">🧠 حافظه معلم هوشمند</strong>
-  <p style="margin:5px 0 9px">چیزهایی را که می‌خواهی در گفت‌وگوهای بعدی به خاطر بسپارم اینجا بنویس؛ مثلاً «اسم من ارسین است».</p>
-  <form id="tutorMemoryForm" class="askrow"><input id="tutorMemoryInput" type="text" maxlength="500" placeholder="مثلاً: اسم من ارسین است" aria-label="اطلاعاتی برای حافظه معلم"><button type="submit" style="background:#9cc7f5;color:#142033">ذخیره حافظه</button></form>
-  <small id="tutorMemoryStatus" style="display:block;margin-top:7px;color:#cbd5e1">حافظه فقط برای حساب خودت ذخیره می‌شود.</small>
- </div>
-<form id="askForm" class="askrow"><input id="question" type="text" maxlength="1500" placeholder="سؤالت را اینجا بنویس..." required><button id="askButton" type="submit">ارسال</button></form>
-<p id="tutorStatus" aria-live="polite"></p><h3>گفت‌وگوهای قبلی</h3><div id="tutorHistory" class="history-list"><div class="history-empty">در حال دریافت تاریخچه...</div></div>
+
+<div class="askrow" style="margin:10px 0;flex-wrap:wrap">
+<button id="newTutorChat" type="button" style="background:#e9bd5b;color:#172033;font-weight:800">
+＋ چت جدید
+</button>
+<span id="activeChatTitle" style="color:#e8c66f;font-size:11px;align-self:center">
+گفت‌وگوی جدید
+</span>
+</div>
+
+<div id="chatlog" class="chatlog">
+<div class="history-empty">سلام! چه چیزی می‌خواهی یاد بگیری؟ 😊</div>
+</div>
+
+<div style="margin:12px 0;padding:12px;background:#17263b;border:1px solid #52627b;border-radius:12px">
+<strong style="color:#e8c66f">🧠 حافظه معلم هوشمند</strong>
+
+<p style="margin:5px 0 9px">
+چیزهایی را که می‌خواهی در گفت‌وگوهای بعدی به خاطر بسپارم اینجا بنویس؛ مثلاً «اسم من ارسین است».
+</p>
+
+<form id="tutorMemoryForm" class="askrow">
+<input id="tutorMemoryInput" type="text" maxlength="500" placeholder="مثلاً: اسم من ارسین است" aria-label="اطلاعاتی برای حافظه معلم">
+<button type="submit" style="background:#9cc7f5;color:#142033">ذخیره حافظه</button>
+</form>
+
+<small id="tutorMemoryStatus" style="display:block;margin-top:7px;color:#cbd5e1">
+حافظه فقط برای حساب خودت ذخیره می‌شود.
+</small>
+</div>
+
+<form id="askForm" class="askrow">
+<input id="question" type="text" maxlength="1500" placeholder="سؤالت را اینجا بنویس..." required>
+<button id="askButton" type="submit">ارسال</button>
+</form>
+
+<p id="tutorStatus" aria-live="polite"></p>
+
+<h3>گفت‌وگوهای قبلی</h3>
+<div id="tutorHistory" class="history-list">
+<div class="history-empty">در حال دریافت تاریخچه...</div>
+</div>
+
 </section>
-<h2 class="section-title" id="teacher">💬 چت با معلم</h2><section class="tutor">
-<p>پیامت را برای معلم بفرست. پاسخ معلم در همین بخش نمایش داده می‌شود.</p><div id="teacherChatLog" class="chatlog"></div>
-<form id="teacherChatForm" class="askrow"><input id="teacherChatInput" type="text" maxlength="2000" placeholder="پیامت را بنویس..." required><button id="teacherChatSend" type="submit">ارسال پیام</button></form>
-<div class="askrow" style="margin-top:10px"><button id="teacherChatRefresh" type="button">به‌روزرسانی پیام‌ها</button></div><p id="teacherChatStatus" aria-live="polite"></p>
-</section><div hidden><div id="lessons"></div><div id="lessonFiles"></div><span id="effortCount"></span><span id="certificateCount"></span></div></main>
+
+<div hidden>
+<div id="lessons"></div>
+<div id="lessonFiles"></div>
+<span id="effortCount"></span>
+<span id="certificateCount"></span>
+</div>
+
+</main>
+
 <script>
 const SUPABASE_URL="https://rdsermutogewhcdsyoon.supabase.co";
 const SUPABASE_KEY="sb_publishable_kybJ2B3BKoT2fScPaz6xRQ_eBOSwiqi";
+
 (async()=>{
  const status=document.getElementById("status");
- const say=t=>{status.textContent=t;status.style.display="block"};
+ const say=t=>{
+  status.textContent=t;
+  status.style.display="block";
+ };
+
  try{
-  if(!window.supabase?.createClient)throw new Error("کتابخانه ورود بارگذاری نشد؛ اتصال اینترنت را بررسی کن.");
-  const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY); window.academyClient=client;
+  if(!window.supabase?.createClient)
+   throw new Error("کتابخانه ورود بارگذاری نشد؛ اتصال اینترنت را بررسی کن.");
+
+  const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  window.academyClient=client;
+
   const {data:{session}}=await client.auth.getSession();
-  if(!session){location.replace("index.html");return}
-  const {data:profile,error}=await client.from("ka_profiles").select("role,approved").eq("id",session.user.id).single();
-  if(error){document.body.classList.add("ready");say("خطا در بررسی دسترسی حساب: "+error.message);return}
-  if(!profile||profile.role!=="student"||profile.approved!==true){await client.auth.signOut();location.replace("index.html?auth=denied");return}
-  document.getElementById("studentName").textContent=session.user.user_metadata?.full_name||session.user.email;
+
+  if(!session){
+   location.replace("index.html");
+   return;
+  }
+
+  const {data:profile,error}=await client
+   .from("ka_profiles")
+   .select("role,approved")
+   .eq("id",session.user.id)
+   .single();
+
+  if(error){
+   document.body.classList.add("ready");
+   say("خطا در بررسی دسترسی حساب: "+error.message);
+   return;
+  }
+
+  if(!profile||profile.role!=="student"||profile.approved!==true){
+   await client.auth.signOut();
+   location.replace("index.html?auth=denied");
+   return;
+  }
+
+  document.getElementById("studentName").textContent=
+   session.user.user_metadata?.full_name||session.user.email;
+
   window.knightStudentId=session.user.id;
-  window.window.activeTutorConversationId=crypto.randomUUID();
+  window.activeTutorConversationId=crypto.randomUUID();
+
   const activeTitle=document.getElementById("activeChatTitle");
+
   const renderTutorConversation=(rows)=>{
-   const log=document.getElementById("chatlog");log.innerHTML="";
-   if(!rows?.length){log.innerHTML='<div class="history-empty">سلام! چه چیزی می‌خواهی یاد بگیری؟ 😊</div>';return;}
+   const log=document.getElementById("chatlog");
+   log.innerHTML="";
+
+   if(!rows?.length){
+    log.innerHTML='<div class="history-empty">سلام! چه چیزی می‌خواهی یاد بگیری؟ 😊</div>';
+    return;
+   }
+
    rows.forEach(item=>{
-    const u=document.createElement("div");u.className="bubble me";u.textContent=item.question;
-    const a=document.createElement("div");a.className="bubble ai";a.textContent=item.answer;
+    const u=document.createElement("div");
+    u.className="bubble me";
+    u.textContent=item.question;
+
+    const a=document.createElement("div");
+    a.className="bubble ai";
+    a.textContent=item.answer;
+
     log.append(u,a);
    });
+
    log.scrollTop=log.scrollHeight;
   };
+
   window.loadTutorHistory=async function(){
    const box=document.getElementById("tutorHistory");
-   const {data,error}=await client.from("ka_tutor_history").select("id,conversation_id,question,answer,created_at").eq("user_id",session.user.id).order("created_at",{ascending:false}).limit(300);
-   if(error){box.innerHTML='<div class="history-empty">برای فعال‌شدن تاریخچهٔ چت‌ها، مدیر باید نسخه جدید فایل تنظیمات را در Supabase اجرا کند.</div>';return}
+
+   const {data,error}=await client
+    .from("ka_tutor_history")
+    .select("id,conversation_id,question,answer,created_at")
+    .eq("user_id",session.user.id)
+    .order("created_at",{ascending:false})
+    .limit(300);
+
+   if(error){
+    box.innerHTML='<div class="history-empty">برای فعال‌شدن تاریخچهٔ چت‌ها، مدیر باید نسخه جدید فایل تنظیمات را در Supabase اجرا کند.</div>';
+    return;
+   }
+
    box.innerHTML="";
-   if(!data?.length){box.innerHTML='<div class="history-empty">هنوز گفت‌وگویی ذخیره نشده است.</div>';return}
+
+   if(!data?.length){
+    box.innerHTML='<div class="history-empty">هنوز گفت‌وگویی ذخیره نشده است.</div>';
+    return;
+   }
+
    const groups=new Map();
-   data.forEach(item=>{const id=item.conversation_id;if(!id)return;if(!groups.has(id))groups.set(id,[]);groups.get(id).push(item);});
+
+   data.forEach(item=>{
+    const id=item.conversation_id;
+    if(!id)return;
+    if(!groups.has(id))groups.set(id,[]);
+    groups.get(id).push(item);
+   });
+
    groups.forEach((rows,id)=>{
     const latest=rows[0],first=rows[rows.length-1];
-    const b=document.createElement("button");b.type="button";b.className="history-item";
-    const title=document.createElement("span");title.textContent=first.question.slice(0,65)+(first.question.length>65?"…":"");
-    const meta=document.createElement("small");meta.textContent=rows.length+" پرسش · "+new Date(latest.created_at).toLocaleString("fa-IR");
+
+    const b=document.createElement("button");
+    b.type="button";
+    b.className="history-item";
+
+    const title=document.createElement("span");
+    title.textContent=first.question.slice(0,65)+(first.question.length>65?"…":"");
+
+    const meta=document.createElement("small");
+    meta.textContent=rows.length+" پرسش · "+new Date(latest.created_at).toLocaleString("fa-IR");
+
     b.append(title,meta);
+
     b.addEventListener("click",()=>{
-     window.activeTutorConversationId=id;activeTitle.textContent=title.textContent;
+     window.activeTutorConversationId=id;
+     activeTitle.textContent=title.textContent;
      renderTutorConversation([...rows].reverse());
      document.getElementById("tutorStatus").textContent="گفت‌وگوی ذخیره‌شده باز شد.";
     });
-    const row=document.createElement("div");row.className="history-row";
-    const del=document.createElement("button");del.type="button";del.className="history-delete";del.textContent="حذف";
+
+    const row=document.createElement("div");
+    row.className="history-row";
+
+    const del=document.createElement("button");
+    del.type="button";
+    del.className="history-delete";
+    del.textContent="حذف";
+
     del.addEventListener("click",async()=>{
      if(!confirm("این گفت‌وگو و همه پیام‌های آن برای همیشه حذف شود؟"))return;
+
      del.disabled=true;
-     const {error:deleteError}=await client.from("ka_tutor_history").delete().eq("user_id",session.user.id).eq("conversation_id",id);
-     if(deleteError){del.disabled=false;document.getElementById("tutorStatus").textContent="حذف گفت‌وگو ناموفق بود: "+deleteError.message;return;}
-     if(window.activeTutorConversationId===id){window.activeTutorConversationId=crypto.randomUUID();activeTitle.textContent="گفت‌وگوی جدید";renderTutorConversation([]);}
+
+     const {error:deleteError}=await client
+      .from("ka_tutor_history")
+      .delete()
+      .eq("user_id",session.user.id)
+      .eq("conversation_id",id);
+
+     if(deleteError){
+      del.disabled=false;
+      document.getElementById("tutorStatus").textContent="حذف گفت‌وگو ناموفق بود: "+deleteError.message;
+      return;
+     }
+
+     if(window.activeTutorConversationId===id){
+      window.activeTutorConversationId=crypto.randomUUID();
+      activeTitle.textContent="گفت‌وگوی جدید";
+      renderTutorConversation([]);
+     }
+
      document.getElementById("tutorStatus").textContent="گفت‌وگو حذف شد.";
      await window.loadTutorHistory();
     });
-    row.append(b,del);box.append(row);
+
+    row.append(b,del);
+    box.append(row);
    });
   };
+
   document.getElementById("newTutorChat").addEventListener("click",()=>{
-   window.activeTutorConversationId=crypto.randomUUID();activeTitle.textContent="گفت‌وگوی جدید";
-   renderTutorConversation([]);document.getElementById("tutorStatus").textContent="چت جدید آماده است.";
+   window.activeTutorConversationId=crypto.randomUUID();
+   activeTitle.textContent="گفت‌وگوی جدید";
+   renderTutorConversation([]);
+   document.getElementById("tutorStatus").textContent="چت جدید آماده است.";
    document.getElementById("question").focus();
   });
+
   await window.loadTutorHistory();
-  const memoryInput=document.getElementById("tutorMemoryInput"),memoryStatus=document.getElementById("tutorMemoryStatus");
-  const {data:memoryRow,error:memoryLoadError}=await client.from("ka_tutor_memory").select("memory_text").eq("user_id",session.user.id).maybeSingle();
-  if(memoryLoadError){memoryStatus.textContent="برای فعال‌شدن حافظه، مدیر باید تنظیمات جدید پایگاه داده را اجرا کند.";}
-  else if(memoryRow?.memory_text)memoryInput.value=memoryRow.memory_text;
-  document.getElementById("tutorMemoryForm").addEventListener("submit",async e=>{
-   e.preventDefault();const value=memoryInput.value.trim();if(!value){memoryStatus.textContent="اول یک متن برای حافظه بنویس.";return;}
-   memoryStatus.textContent="در حال ذخیره...";
-   const {error}=await client.from("ka_tutor_memory").upsert({user_id:session.user.id,memory_text:value,updated_at:new Date().toISOString()},{onConflict:"user_id"});
-   memoryStatus.textContent=error?"ذخیره حافظه ناموفق بود: "+error.message:"حافظه ذخیره شد؛ در چت‌های بعدی هم از آن استفاده می‌کنم. ✓";
-  });
-  const chatLog=document.getElementById("teacherChatLog"),chatStatus=document.getElementById("teacherChatStatus");
-  const showChatStatus=(msg)=>{chatStatus.textContent=msg;};
-  async function loadTeacherChat(){
-   const {data,error}=await client.from("ka_teacher_messages").select("id,sender_role,message,created_at").order("created_at",{ascending:true}).limit(100);
-   if(error){showChatStatus("برای فعال‌شدن چت، مدیر باید تنظیمات پایگاه داده را اجرا کند.");return;}
-   chatLog.innerHTML="";
-   if(!data?.length){chatLog.innerHTML='<div class="bubble ai">هنوز پیامی ردوبدل نشده است. اولین پیام را بفرست! 😊</div>';return;}
-   data.forEach(m=>{const d=document.createElement("div");d.className="bubble "+(m.sender_role==="student"?"me":"ai");d.textContent=(m.sender_role==="student"?"شما: ":"خانم سلیمی: ")+m.message;chatLog.append(d);});
-   chatLog.scrollTop=chatLog.scrollHeight;showChatStatus("");
+
+  const memoryInput=document.getElementById("tutorMemoryInput");
+  const memoryStatus=document.getElementById("tutorMemoryStatus");
+
+  const {data:memoryRow,error:memoryLoadError}=await client
+   .from("ka_tutor_memory")
+   .select("memory_text")
+   .eq("user_id",session.user.id)
+   .maybeSingle();
+
+  if(memoryLoadError){
+   memoryStatus.textContent="برای فعال‌شدن حافظه، مدیر باید تنظیمات جدید پایگاه داده را اجرا کند.";
   }
-  document.getElementById("teacherChatRefresh").addEventListener("click",loadTeacherChat);
-  document.getElementById("teacherChatForm").addEventListener("submit",async e=>{
-   e.preventDefault();const input=document.getElementById("teacherChatInput"),btn=document.getElementById("teacherChatSend"),message=input.value.trim();if(!message)return;
-   btn.disabled=true;showChatStatus("در حال ارسال...");
-   const {error}=await client.from("ka_teacher_messages").insert({student_id:session.user.id,sender_id:session.user.id,sender_role:"student",message});
-   if(error)showChatStatus("ارسال پیام انجام نشد؛ تنظیمات چت باید در Supabase اجرا شود.");
-   else{input.value="";await loadTeacherChat();showChatStatus("پیام ارسال شد.");}
-   btn.disabled=false;
+  else if(memoryRow?.memory_text){
+   memoryInput.value=memoryRow.memory_text;
+  }
+
+  document.getElementById("tutorMemoryForm").addEventListener("submit",async e=>{
+   e.preventDefault();
+
+   const value=memoryInput.value.trim();
+
+   if(!value){
+    memoryStatus.textContent="اول یک متن برای حافظه بنویس.";
+    return;
+   }
+
+   memoryStatus.textContent="در حال ذخیره...";
+
+   const {error}=await client
+    .from("ka_tutor_memory")
+    .upsert({
+     user_id:session.user.id,
+     memory_text:value,
+     updated_at:new Date().toISOString()
+    },{onConflict:"user_id"});
+
+   memoryStatus.textContent=error
+    ?"ذخیره حافظه ناموفق بود: "+error.message
+    :"حافظه ذخیره شد؛ در چت‌های بعدی هم از آن استفاده می‌کنم. ✓";
   });
-  await loadTeacherChat();
 
   document.body.classList.add("ready");
-  const {data:lessons, error:lessonError}=await client.from("ka_lessons").select("id,title,description,created_at").eq("published",true).order("created_at",{ascending:false}).limit(8);
-  const list=document.getElementById("lessons");list.innerHTML="";
-  if(lessonError){list.innerHTML='<div class="empty">فعلاً امکان دریافت فهرست آموزش‌ها نیست.</div>'}
-  else if(!lessons?.length){list.innerHTML='<div class="empty">هنوز آموزشی منتشر نشده است. به‌زودی درس‌های تازه اینجا قرار می‌گیرند.</div>'}
-  else lessons.forEach(item=>{const card=document.createElement("article");card.className="lesson";const h=document.createElement("h3");h.textContent=item.title||"آموزش بدون عنوان";const p=document.createElement("p");p.textContent=item.description||"برای مشاهده جزئیات این آموزش با معلم خود هماهنگ کن.";const tag=document.createElement("span");tag.className="tag";tag.textContent="آموزش منتشرشده";card.append(h,p,tag);list.append(card)});
-  const fileList=document.getElementById("lessonFiles");
-  fileList.innerHTML="";
-  if(!lessons?.length){fileList.innerHTML='<div class="empty">ابتدا باید یک درس منتشر شود تا فایل‌های آن نمایش داده شوند.</div>'}
+
+  const {data:lessons,error:lessonError}=await client
+   .from("ka_lessons")
+   .select("id,title,description,created_at")
+   .eq("published",true)
+   .order("created_at",{ascending:false})
+   .limit(8);
+
+  const list=document.getElementById("lessons");
+  list.innerHTML="";
+
+  if(lessonError){
+   list.innerHTML='<div class="empty">فعلاً امکان دریافت فهرست آموزش‌ها نیست.</div>';
+  }
+  else if(!lessons?.length){
+   list.innerHTML='<div class="empty">هنوز آموزشی منتشر نشده است. به‌زودی درس‌های تازه اینجا قرار می‌گیرند.</div>';
+  }
   else{
-   const lessonIds=lessons.map(x=>x.id);
-   const {data:files,error:fileError}=await client.from("ka_academy_files").select("id,lesson_id,file_name,file_path,created_at").in("lesson_id",lessonIds).order("created_at",{ascending:false});
-   if(fileError){fileList.innerHTML='<div class="empty">دریافت فایل‌ها ناموفق بود: '+fileError.message+'</div>'}
-   else if(!files?.length){fileList.innerHTML='<div class="empty">برای درس‌های منتشرشده هنوز فایلی بارگذاری نشده است.</div>'}
-   else files.forEach(file=>{
-    const card=document.createElement("article");card.className="lesson";
-    const h=document.createElement("h3");h.textContent=file.file_name||"فایل آموزشی";
-    const p=document.createElement("p");p.textContent="درس: "+(lessons.find(x=>x.id===file.lesson_id)?.title||"آموزش");
-    const button=document.createElement("button");button.type="button";button.textContent="دریافت فایل";button.style.cssText="margin-top:12px;background:#1c2b43;color:#fff;border-radius:9px;padding:9px 13px";
-    button.addEventListener("click",async()=>{
-     button.disabled=true;button.textContent="در حال آماده‌سازی...";
-     const fileTab=window.open("about:blank","_blank");
-     try{
-      const {data,error}=await client.storage.from("academy-files").createSignedUrl(file.file_path,60);
-      if(error)throw error;
-      if(fileTab){fileTab.opener=null;fileTab.location.href=data.signedUrl;}
-      else{window.location.href=data.signedUrl;}
-     }catch(err){if(fileTab)fileTab.close();say("دریافت فایل انجام نشد: "+(err.message||"خطای نامشخص"));}
-     finally{button.disabled=false;button.textContent="دریافت فایل";}
-    });
-    card.append(h,p,button);fileList.append(card);
+   lessons.forEach(item=>{
+    const card=document.createElement("article");
+    card.className="lesson";
+
+    const h=document.createElement("h3");
+    h.textContent=item.title||"آموزش بدون عنوان";
+
+    const p=document.createElement("p");
+    p.textContent=item.description||"برای مشاهده جزئیات این آموزش با معلم خود هماهنگ کن.";
+
+    const tag=document.createElement("span");
+    tag.className="tag";
+    tag.textContent="آموزش منتشرشده";
+
+    card.append(h,p,tag);
+    list.append(card);
    });
   }
-  const {count:efforts,error:effortError}=await client.from("ka_effort_awards").select("id",{count:"exact",head:true}).eq("student_id",session.user.id);
-  const {count:certs,error:certError}=await client.from("ka_effort_certificates").select("id",{count:"exact",head:true}).eq("student_id",session.user.id);
+
+  const fileList=document.getElementById("lessonFiles");
+  fileList.innerHTML="";
+
+  if(!lessons?.length){
+   fileList.innerHTML='<div class="empty">ابتدا باید یک درس منتشر شود تا فایل‌های آن نمایش داده شوند.</div>';
+  }
+  else{
+   const lessonIds=lessons.map(x=>x.id);
+
+   const {data:files,error:fileError}=await client
+    .from("ka_academy_files")
+    .select("id,lesson_id,file_name,file_path,created_at")
+    .in("lesson_id",lessonIds)
+    .order("created_at",{ascending:false});
+
+   if(fileError){
+    fileList.innerHTML='<div class="empty">دریافت فایل‌ها ناموفق بود: '+fileError.message+'</div>';
+   }
+   else if(!files?.length){
+    fileList.innerHTML='<div class="empty">برای درس‌های منتشرشده هنوز فایلی بارگذاری نشده است.</div>';
+   }
+   else{
+    files.forEach(file=>{
+     const card=document.createElement("article");
+     card.className="lesson";
+
+     const h=document.createElement("h3");
+     h.textContent=file.file_name||"فایل آموزشی";
+
+     const p=document.createElement("p");
+     p.textContent="درس: "+(lessons.find(x=>x.id===file.lesson_id)?.title||"آموزش");
+
+     const button=document.createElement("button");
+     button.type="button";
+     button.textContent="دریافت فایل";
+     button.style.cssText="margin-top:12px;background:#1c2b43;color:#fff;border-radius:9px;padding:9px 13px";
+
+     button.addEventListener("click",async()=>{
+      button.disabled=true;
+      button.textContent="در حال آماده‌سازی...";
+
+      const fileTab=window.open("about:blank","_blank");
+
+      try{
+       const {data,error}=await client.storage
+        .from("academy-files")
+        .createSignedUrl(file.file_path,60);
+
+       if(error)throw error;
+
+       if(fileTab){
+        fileTab.opener=null;
+        fileTab.location.href=data.signedUrl;
+       }
+       else{
+        window.location.href=data.signedUrl;
+       }
+      }
+      catch(err){
+       if(fileTab)fileTab.close();
+       say("دریافت فایل انجام نشد: "+(err.message||"خطای نامشخص"));
+      }
+      finally{
+       button.disabled=false;
+       button.textContent="دریافت فایل";
+      }
+     });
+
+     card.append(h,p,button);
+     fileList.append(card);
+    });
+   }
+  }
+
+  const {count:efforts,error:effortError}=await client
+   .from("ka_effort_awards")
+   .select("id",{count:"exact",head:true})
+   .eq("student_id",session.user.id);
+
+  const {count:certs,error:certError}=await client
+   .from("ka_effort_certificates")
+   .select("id",{count:"exact",head:true})
+   .eq("student_id",session.user.id);
+
   if(!effortError)document.getElementById("effortCount").textContent=efforts??0;
   if(!certError)document.getElementById("certificateCount").textContent=certs??0;
- }catch(e){document.body.classList.add("ready");say(e.message||"خطا در بارگذاری پنل دانش‌آموز.") }
+
+ }
+ catch(e){
+  document.body.classList.add("ready");
+  say(e.message||"خطا در بارگذاری پنل دانش‌آموز.");
+ }
 })();
+
 document.getElementById("askForm").addEventListener("submit",async(e)=>{
  e.preventDefault();
- const input=document.getElementById("question"),button=document.getElementById("askButton"),log=document.getElementById("chatlog"),note=document.getElementById("tutorStatus");
- const question=input.value.trim(); if(!question)return;
- const add=(text,kind)=>{const d=document.createElement("div");d.className="bubble "+kind;d.textContent=text;log.append(d);log.scrollTop=log.scrollHeight;};
- add(question,"me");input.value="";button.disabled=true;note.textContent="معلم هوشمند در حال فکر کردن است...";
- try {
-  const {data:previousTurns, error:historyError}=await window.academyClient
-    .from("ka_tutor_history")
-    .select("question,answer")
-    .eq("user_id",window.knightStudentId)
-    .eq("conversation_id",window.activeTutorConversationId)
-    .order("created_at",{ascending:true})
-    .limit(12);
-  if(historyError)throw new Error("دریافت سابقه این گفت‌وگو ناموفق بود: "+historyError.message);
+
+ const input=document.getElementById("question");
+ const button=document.getElementById("askButton");
+ const log=document.getElementById("chatlog");
+ const note=document.getElementById("tutorStatus");
+
+ const question=input.value.trim();
+ if(!question)return;
+
+ const add=(text,kind)=>{
+  const d=document.createElement("div");
+  d.className="bubble "+kind;
+  d.textContent=text;
+  log.append(d);
+  log.scrollTop=log.scrollHeight;
+ };
+
+ add(question,"me");
+ input.value="";
+ button.disabled=true;
+ note.textContent="معلم هوشمند در حال فکر کردن است...";
+
+ try{
+  const {data:previousTurns,error:historyError}=await window.academyClient
+   .from("ka_tutor_history")
+   .select("question,answer")
+   .eq("user_id",window.knightStudentId)
+   .eq("conversation_id",window.activeTutorConversationId)
+   .order("created_at",{ascending:true})
+   .limit(12);
+
+  if(historyError)
+   throw new Error("دریافت سابقه این گفت‌وگو ناموفق بود: "+historyError.message);
+
   const history=(previousTurns||[]).flatMap(item=>[
-    {role:"user",content:item.question},
-    {role:"assistant",content:item.answer}
+   {role:"user",content:item.question},
+   {role:"assistant",content:item.answer}
   ]).slice(-12);
-  const { data, error } =
-    await window.academyClient.functions.invoke(
-      "knight-tutor",
-      { body: { question, history, memory: document.getElementById("tutorMemoryInput")?.value?.trim() || "" } }
-    );
 
-  if (error) {
-    let detail = "";
-    let status = "";
-
-    if (error.context) {
-      status = error.context.status || "";
-
-      try {
-        const response = await error.context.clone().json();
-        detail = response.error || response.message || "";
-      } catch {
-        try {
-          detail = await error.context.clone().text();
-        } catch {
-          detail = "";
-        }
-      }
+  const {data,error}=await window.academyClient.functions.invoke(
+   "knight-tutor",
+   {
+    body:{
+     question,
+     history,
+     memory:document.getElementById("tutorMemoryInput")?.value?.trim()||""
     }
+   }
+  );
 
-    throw new Error(
-      detail || `خطای تابع هوشمند. کد وضعیت: ${status || "نامشخص"}`
-    );
+  if(error){
+   let detail="";
+   let status="";
+
+   if(error.context){
+    status=error.context.status||"";
+
+    try{
+     const response=await error.context.clone().json();
+     detail=response.error||response.message||"";
+    }
+    catch{
+     try{
+      detail=await error.context.clone().text();
+     }
+     catch{
+      detail="";
+     }
+    }
+   }
+
+   throw new Error(detail||`خطای تابع هوشمند. کد وضعیت: ${status||"نامشخص"}`);
   }
 
-  if (data?.error) {
-    throw new Error(data.error);
+  if(data?.error)throw new Error(data.error);
+
+  if(!data?.answer)
+   throw new Error("پاسخ متنی از هوش مصنوعی دریافت نشد.");
+
+  add(data.answer,"ai");
+
+  const {error:saveError}=await window.academyClient
+   .from("ka_tutor_history")
+   .insert({
+    user_id:window.knightStudentId,
+    conversation_id:window.activeTutorConversationId,
+    question,
+    answer:data.answer
+   });
+
+  if(saveError){
+   note.textContent="پاسخ دریافت شد، اما تاریخچه ذخیره نشد. تنظیمات پایگاه داده را بررسی کن.";
+  }
+  else{
+   note.textContent="گفت‌وگو ذخیره شد ✓";
+   await window.loadTutorHistory();
   }
 
-  if (!data?.answer) {
-    throw new Error("پاسخ متنی از هوش مصنوعی دریافت نشد.");
-  }
-
-  add(data.answer, "ai");
-  const {error:saveError}=await window.academyClient.from("ka_tutor_history").insert({user_id:window.knightStudentId,conversation_id:window.activeTutorConversationId,question,answer:data.answer});
-  if(saveError){note.textContent="پاسخ دریافت شد، اما تاریخچه ذخیره نشد. تنظیمات پایگاه داده را بررسی کن.";}
-  else{note.textContent="گفت‌وگو ذخیره شد ✓";await window.loadTutorHistory();}
-
-} catch (err) {
-  const message = err?.message || "خطای ناشناخته در ارتباط با معلم هوشمند";
-  add("جزئیات خطا: " + message, "ai");
-  note.textContent = "لطفاً جزئیات خطا را بررسی کن.";
-  console.error("Knight Tutor Error:", err);
-} finally {
-  button.disabled = false;
+ }
+ catch(err){
+  const message=err?.message||"خطای ناشناخته در ارتباط با معلم هوشمند";
+  add("جزئیات خطا: "+message,"ai");
+  note.textContent="لطفاً جزئیات خطا را بررسی کن.";
+  console.error("Knight Tutor Error:",err);
+ }
+ finally{
+  button.disabled=false;
   input.focus();
-}
+ }
 });
-document.getElementById("logout").addEventListener("click",async()=>{if(window.supabase){const c=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);await c.auth.signOut()}location.replace("index.html")});
-</script><a href="./chat.html" style="position:fixed;left:18px;bottom:18px;z-index:9999;background:#e8bd5b;color:#171717;padding:12px 17px;border-radius:999px;text-decoration:none;font:700 13px Vazirmatn,Tahoma,sans-serif;box-shadow:0 8px 25px #0006">💬 پیام‌رسان</a></body></html>
+
+document.getElementById("logout").addEventListener("click",async()=>{
+ if(window.supabase){
+  const c=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  await c.auth.signOut();
+ }
+ location.replace("index.html");
+});
+</script>
+</body>
+</html>
