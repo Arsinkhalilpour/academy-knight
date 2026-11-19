@@ -164,3 +164,32 @@ drop trigger if exists ka_exam_validate_attempt_before_insert on public.ka_exam_
 create trigger ka_exam_validate_attempt_before_insert
 before insert on public.ka_exam_attempts
 for each row execute function public.ka_exam_validate_attempt_v1();
+
+
+-- Keep correct answers out of the student-readable exam row.
+create table if not exists public.ka_exam_answer_keys (
+  exam_id uuid primary key references public.ka_exams(id) on delete cascade,
+  answer_key jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+alter table public.ka_exam_answer_keys enable row level security;
+drop policy if exists "exam owners manage answer keys" on public.ka_exam_answer_keys;
+create policy "exam owners manage answer keys" on public.ka_exam_answer_keys
+for all to authenticated
+using (
+  exists (
+    select 1 from public.ka_exams e
+    join public.ka_profiles p on p.id=(select auth.uid())
+    where e.id=exam_id and e.created_by=(select auth.uid())
+      and p.approved is true and p.role::text in ('teacher','admin','creator')
+  )
+)
+with check (
+  exists (
+    select 1 from public.ka_exams e
+    join public.ka_profiles p on p.id=(select auth.uid())
+    where e.id=exam_id and e.created_by=(select auth.uid())
+      and p.approved is true and p.role::text in ('teacher','admin','creator')
+  )
+);
+grant select, insert, update, delete on public.ka_exam_answer_keys to authenticated;
