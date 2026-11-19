@@ -115,10 +115,11 @@ async function submitCurrentAttempt(autoSubmit=false){
  const btn=$("submitAttempt");btn.disabled=true;
  const answers={};currentExam.questions.forEach((q,i)=>{answers[i]=q.type==="mcq"?document.querySelector('input[name="q'+i+'"]:checked')?.value??null:$("answer"+i)?.value||"";});
  try{
-  const {error}=await db.from("ka_exam_attempts").insert({exam_id:currentExam.id,student_id:session.user.id,answers,attempt_no:currentExam.attemptNo});
+  const {data:result,error}=await db.from("ka_exam_attempts").insert({exam_id:currentExam.id,student_id:session.user.id,answers,attempt_no:currentExam.attemptNo}).select("status,score,max_score,feedback").single();
   if(error)throw error;
   if(examTimer)clearInterval(examTimer);examTimer=null;
-  say("attemptStatus",autoSubmit?"زمان تمام شد و پاسخ‌ها به‌طور خودکار ثبت شدند. ✅":"پاسخ‌ها با موفقیت ثبت شدند. پس از تصحیح، نتیجه نمایش داده می‌شود. ✅");
+  const resultText=result?.status==="graded"?"نمرهٔ شما: "+result.score+" از "+result.max_score+" 🎉":"پاسخ‌ها ثبت شدند. سؤال‌های چهارگزینه‌ای تصحیح شده‌اند و سؤال‌های تشریحی در انتظار بررسی معلم هستند.";
+  say("attemptStatus",(autoSubmit?"زمان تمام شد. ":"")+resultText);
   $("attemptArea").classList.add("hidden");currentExam=null;await loadHistory();
  }catch(e){
   say("attemptStatus","ارسال ناموفق: "+e.message+(autoSubmit?"؛ لطفاً دوباره دکمه ثبت را بزن.":""));
