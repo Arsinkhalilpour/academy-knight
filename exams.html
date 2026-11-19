@@ -44,7 +44,7 @@ async function loadTeacherExams(){
  const box=$("teacherArea");let list=document.getElementById("teacherExamList");
  if(!list){list=document.createElement("div");list.id="teacherExamList";list.className="panel";box.after(list);}
  list.innerHTML="<h2>آزمون‌های ساخته‌شده</h2>";
- (data||[]).forEach(e=>{const d=document.createElement("div");d.className="exam";d.textContent=e.title+" · "+e.subject+" · "+e.status;list.append(d);});
+ (data||[]).forEach(e=>{const d=document.createElement("div");d.className="exam";const info=document.createElement("div");info.textContent=e.title+" · "+e.subject+" · "+e.status;const del=document.createElement("button");del.className="btn secondary";del.style.marginTop="10px";del.textContent="🗑️ حذف آزمون";del.addEventListener("click",async()=>{if(!confirm("آیا مطمئنی می‌خواهی این آزمون را برای همیشه حذف کنی؟ همهٔ پاسخ‌ها و سوابق شرکت در این آزمون نیز حذف می‌شوند."))return;del.disabled=true;del.textContent="در حال حذف...";const {error}=await db.from("ka_exams").delete().eq("id",e.id).eq("created_by",session.user.id);if(error){alert("حذف انجام نشد: "+error.message);del.disabled=false;del.textContent="🗑️ حذف آزمون";return;}await loadTeacherExams();});d.append(info,del);list.append(d);});
 }
 $("save").addEventListener("click",async()=>{
  const btn=$("save");btn.disabled=true;say("createStatus","در حال ذخیره...");
