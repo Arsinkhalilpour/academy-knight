@@ -266,3 +266,82 @@ drop trigger if exists ka_exam_autograde_mcq_before_insert on public.ka_exam_att
 create trigger ka_exam_autograde_mcq_before_insert
 before insert on public.ka_exam_attempts
 for each row execute function public.ka_exam_autograde_mcq_v1();
+
+
+-- Private storage for teacher-provided exam attachments.
+alter table public.ka_exams
+  add column if not exists attachments jsonb not null default '[]'::jsonb;
+
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'ka-exam-files',
+  'ka-exam-files',
+  false,
+  15728640,
+  array[
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'application/pdf',
+    'text/plain',
+    'text/csv',
+    'image/jpeg',
+    'image/png'
+  ]
+)
+on conflict (id) do update
+set public = false,
+    file_size_limit = 15728640,
+    allowed_mime_types = excluded.allowed_mime_types;
+
+drop policy if exists "exam owners upload exam files" on storage.objects;
+create policy "exam owners upload exam files"
+on storage.objects for insert to authenticated
+with check (
+  bucket_id = 'ka-exam-files'
+  and exists (
+    select 1 from public.ka_exams e
+    where e.id::text = (storage.foldername(name))[1]
+      and e.created_by = (select auth.uid())
+  )
+);
+
+drop policy if exists "exam owners and assigned students read exam files" on storage.objects;
+create policy "exam owners and assigned students read exam files"
+on storage.objects for select to authenticated
+using (
+  bucket_id = 'ka-exam-files'
+  and exists (
+    select 1
+    from public.ka_exams e
+    join public.ka_profiles p on p.id = (select auth.uid())
+    where e.id::text = (storage.foldername(name))[1]
+      and (
+        (e.created_by = (select auth.uid())
+         and p.approved is true
+         and p.role::text in ('teacher','admin','creator'))
+        or
+        (e.status = 'published'
+         and (e.starts_at is null or e.starts_at <= now())
+         and (e.ends_at is null or e.ends_at >= now())
+         and (cardinality(e.assignment_user_ids)=0 or (select auth.uid()) = any(e.assignment_user_ids))
+         and p.approved is true
+         and p.role::text = 'student')
+      )
+  )
+);
+
+drop policy if exists "exam owners delete exam files" on storage.objects;
+create policy "exam owners delete exam files"
+on storage.objects for delete to authenticated
+using (
+  bucket_id = 'ka-exam-files'
+  and exists (
+    select 1 from public.ka_exams e
+    where e.id::text = (storage.foldername(name))[1]
+      and e.created_by = (select auth.uid())
+  )
+);
