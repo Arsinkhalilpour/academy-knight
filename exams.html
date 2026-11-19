@@ -18,7 +18,7 @@
 (async()=>{
 const URL="https://rdsermutogewhcdsyoon.supabase.co",KEY="sb_publishable_kybJ2B3BKoT2fScPaz6xRQ_eBOSwiqi",db=supabase.createClient(URL,KEY);
 const $=id=>document.getElementById(id),say=(id,msg)=>$(id).textContent=msg;
-let session,profile,currentExam;
+let session,profile,currentExam,examTimer=null,examDeadline=0,submittingAttempt=false;
 const sample=[{type:"mcq",text:"حاصل ۲ + ۲ چیست؟",options:["۳","۴","۵","۶"],answer:1,points:2},{type:"written",text:"روش حل خود را توضیح بده.",points:3}];
 const jalaliFormatter=new Intl.DateTimeFormat("en-US-u-ca-persian-nu-latn",{year:"numeric",month:"2-digit",day:"2-digit",timeZone:"UTC"});
 function jalaliToIso(dateText,timeText){
@@ -93,13 +93,37 @@ async function startExam(e){
  currentExam={...e,attemptNo:(old||[]).length+1};
  $("attemptTitle").textContent=e.title;$("attemptQuestions").innerHTML="";
  e.questions.forEach((q,i)=>{const d=document.createElement("div");d.className="q";const t=document.createElement("b");t.textContent=(i+1)+". "+q.text+" ("+q.points+" نمره)";d.append(t);if(q.type==="mcq"){q.options.forEach((op,j)=>{const l=document.createElement("label"),r=document.createElement("input");r.type="radio";r.name="q"+i;r.value=j;r.style.width="auto";l.append(r,document.createTextNode(" "+op));d.append(l);});}else{const a=document.createElement("textarea");a.id="answer"+i;a.style.direction="rtl";a.style.textAlign="right";a.placeholder="پاسخ تشریحی...";d.append(a);} $("attemptQuestions").append(d);});
- $("attemptArea").classList.remove("hidden");$("attemptArea").scrollIntoView({behavior:"smooth"});
+ $("attemptArea").classList.remove("hidden");$("attemptArea").scrollIntoView({behavior:"smooth"});startExamTimer(e.duration_minutes);
 }
-$("submitAttempt").addEventListener("click",async()=>{
- if(!currentExam)return;const btn=$("submitAttempt");btn.disabled=true;
+function startExamTimer(minutes){
+ if(examTimer)clearInterval(examTimer);
+ const duration=Math.max(1,Number(minutes)||1)*60;
+ examDeadline=Date.now()+duration*1000;
+ const tick=()=>{
+  const left=Math.max(0,Math.ceil((examDeadline-Date.now())/1000));
+  const mm=String(Math.floor(left/60)).padStart(2,"0"),ss=String(left%60).padStart(2,"0");
+  $("timer").textContent="زمان باقی‌مانده: "+mm+":"+ss;
+  if(left<=0){clearInterval(examTimer);examTimer=null;say("attemptStatus","زمان آزمون تمام شد؛ پاسخ‌ها در حال ثبت خودکار هستند.");submitCurrentAttempt(true);}
+ };
+ tick();examTimer=setInterval(tick,500);
+}
+async function submitCurrentAttempt(autoSubmit=false){
+ if(!currentExam||submittingAttempt)return;
+ submittingAttempt=true;
+ const btn=$("submitAttempt");btn.disabled=true;
  const answers={};currentExam.questions.forEach((q,i)=>{answers[i]=q.type==="mcq"?document.querySelector('input[name="q'+i+'"]:checked')?.value??null:$("answer"+i)?.value||"";});
- try{const {error}=await db.from("ka_exam_attempts").insert({exam_id:currentExam.id,student_id:session.user.id,answers,attempt_no:currentExam.attemptNo});if(error)throw error;say("attemptStatus","پاسخ‌ها با موفقیت ثبت شدند. پس از تصحیح، نتیجه نمایش داده می‌شود. ✅");$("attemptArea").classList.add("hidden");await loadHistory();}catch(e){say("attemptStatus","ارسال ناموفق: "+e.message);}finally{btn.disabled=false;}
-});
+ try{
+  const {error}=await db.from("ka_exam_attempts").insert({exam_id:currentExam.id,student_id:session.user.id,answers,attempt_no:currentExam.attemptNo});
+  if(error)throw error;
+  if(examTimer)clearInterval(examTimer);examTimer=null;
+  say("attemptStatus",autoSubmit?"زمان تمام شد و پاسخ‌ها به‌طور خودکار ثبت شدند. ✅":"پاسخ‌ها با موفقیت ثبت شدند. پس از تصحیح، نتیجه نمایش داده می‌شود. ✅");
+  $("attemptArea").classList.add("hidden");currentExam=null;await loadHistory();
+ }catch(e){
+  say("attemptStatus","ارسال ناموفق: "+e.message+(autoSubmit?"؛ لطفاً دوباره دکمه ثبت را بزن.":""));
+  btn.disabled=false;submittingAttempt=false;
+ }
+}
+$("submitAttempt").addEventListener("click",()=>submitCurrentAttempt(false));
 async function loadHistory(){
  const {data,error}=await db.from("ka_exam_attempts").select("id,exam_id,attempt_no,status,score,max_score,evaluation,submitted_at,ka_exams(title)").eq("student_id",session.user.id).order("submitted_at",{ascending:false});
  if(error){say("attemptHistory",error.message);return;}const box=$("attemptHistory");box.innerHTML="";
