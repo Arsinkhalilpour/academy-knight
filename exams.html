@@ -85,9 +85,11 @@ async function loadStudentExams(){
  if(error){say("examList","دریافت آزمون‌ها ناموفق بود. "+error.message);return;}
  const box=$("examList");box.innerHTML="";
  if(!data?.length){box.textContent="فعلاً آزمون فعالی وجود ندارد.";return;}
- for(const e of data){const d=document.createElement("div");d.className="exam";const h=document.createElement("b");h.textContent=e.title+" · "+e.subject;const p=document.createElement("p");p.className="muted";p.textContent=e.description+" | "+e.duration_minutes+" دقیقه | حداکثر "+e.max_attempts+" بار";const b=document.createElement("button");b.className="btn";b.textContent="شروع آزمون";b.onclick=()=>startExam(e);d.append(h,p,b);box.append(d);}
+ for(const e of data){const d=document.createElement("div");d.className="exam";const h=document.createElement("b");h.textContent=e.title+" · "+e.subject;const p=document.createElement("p");p.className="muted";p.textContent=e.description+" | "+e.duration_minutes+" دقیقه | حداکثر "+e.max_attempts+" بار";const b=document.createElement("button");b.className="btn";const now=Date.now(),start=e.starts_at?new Date(e.starts_at).getTime():0,end=e.ends_at?new Date(e.ends_at).getTime():Infinity;let availability="";if(start&&now<start){b.disabled=true;b.textContent="هنوز شروع نشده";availability="شروع: "+new Intl.DateTimeFormat("fa-IR-u-ca-persian",{dateStyle:"short",timeStyle:"short",timeZone:"Asia/Tehran"}).format(new Date(start));}else if(now>end){b.disabled=true;b.textContent="مهلت آزمون تمام شده";availability="مهلت شرکت به پایان رسیده است.";}else{b.textContent="شروع آزمون";}if(availability){const time=document.createElement("div");time.className="muted";time.textContent=availability;p.append(document.createElement("br"),time);}b.onclick=()=>startExam(e);d.append(h,p,b);box.append(d);}
 }
 async function startExam(e){
+ const now=Date.now(),start=e.starts_at?new Date(e.starts_at).getTime():0,end=e.ends_at?new Date(e.ends_at).getTime():Infinity;
+ if((start&&now<start)||now>end){say("examList",start&&now<start?"هنوز زمان شروع این آزمون نرسیده است.":"مهلت شرکت در این آزمون تمام شده است.");return;}
  const {data:old}=await db.from("ka_exam_attempts").select("id,attempt_no").eq("exam_id",e.id).eq("student_id",session.user.id);
  if((old||[]).length>=e.max_attempts){say("examList","تعداد دفعات مجاز این آزمون تمام شده است.");return;}
  currentExam={...e,attemptNo:(old||[]).length+1};
