@@ -89,7 +89,7 @@ async function loadHistory(){
  const {data,error}=await db.from("ka_exam_attempts").select("id,exam_id,attempt_no,status,score,max_score,evaluation,submitted_at,ka_exams(title)").eq("student_id",session.user.id).order("submitted_at",{ascending:false});
  if(error){say("attemptHistory",error.message);return;}const box=$("attemptHistory");box.innerHTML="";
  if(!data?.length){box.textContent="هنوز در آزمونی شرکت نکرده‌ای.";return;}
- data.forEach(a=>{const d=document.createElement("div");d.className="exam";d.textContent=(a.ka_exams?.title||"آزمون")+" · تلاش "+a.attempt_no+" · "+(a.status==="graded"?(a.score+"/"+a.max_score+" · "+(a.evaluation||"")):"در انتظار تصحیح");box.append(d);});
+ data.forEach(a=>{const d=document.createElement("div");d.className="exam";const date=a.submitted_at?new Intl.DateTimeFormat("fa-IR-u-ca-persian",{year:"numeric",month:"long",day:"numeric",hour:"2-digit",minute:"2-digit",timeZone:"Asia/Tehran"}).format(new Date(a.submitted_at)):"—";d.textContent=(a.ka_exams?.title||"آزمون")+" · تلاش "+a.attempt_no+" · تاریخ شرکت: "+date+" · "+(a.status==="graded"?(a.score+"/"+a.max_score+" · "+(a.evaluation||"")):"در انتظار تصحیح");box.append(d);});
 }
 })();
 </script></body></html>
