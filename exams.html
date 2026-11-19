@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>آزمون‌ها | آکادمی شوالیه</title><link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#090e18;--panel:#121d2d;--panel2:#19283d;--line:#2b3b53;--gold:#e8bd5b;--text:#f4f6fb;--muted:#9eacc0}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Vazirmatn,Tahoma,sans-serif}.wrap{max-width:1050px;margin:auto;padding:22px}.top,.row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.brand{font-weight:800;font-size:18px}.brand small{display:block;color:var(--muted);font-size:10px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin:16px 0}.panel h2{font-size:17px;margin:0 0 12px}.muted{color:var(--muted);font-size:12px;line-height:2}.field{display:grid;gap:6px;margin:11px 0}.field label{font-size:12px;color:var(--muted)}input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:9px;background:var(--panel2);color:var(--text);font:inherit;font-size:12px}textarea{min-height:140px;direction:ltr;text-align:left}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.btn{border:0;border-radius:9px;background:var(--gold);color:#171717;padding:11px 17px;font:800 12px Vazirmatn;cursor:pointer}.btn.secondary{background:#26364d;color:white;border:1px solid var(--line)}.btn:disabled{opacity:.5}.status{font-size:12px;color:var(--gold);line-height:2;white-space:pre-wrap}.exam{padding:14px;margin:10px 0;background:var(--panel2);border:1px solid var(--line);border-radius:12px}.q{padding:12px;margin:10px 0;background:#0e1725;border-radius:10px}.q label{display:block;margin:7px 0;font-size:13px}.hidden{display:none!important}.pill{font-size:10px;color:var(--gold);border:1px solid #66552e;padding:4px 8px;border-radius:20px}@media(max-width:650px){.grid{grid-template-columns:1fr}.wrap{padding:14px}}
+</style></head><body><main class="wrap"><header class="top"><div class="brand">♞ آکادمی شوالیه<small>سامانهٔ آزمون و تمرین</small></div><div class="row"><span id="who" class="pill">در حال بررسی حساب...</span><a class="btn secondary" href="./teacher.html" id="back">بازگشت به پنل</a></div></header>
+<div id="notice" class="status">در حال اتصال...</div>
+<section id="teacherArea" class="panel hidden"><h2>✍️ ساخت آزمون جدید</h2><p class="muted">سؤال‌ها را به قالب JSON وارد کن. هر سؤال می‌تواند چهارگزینه‌ای یا تشریحی باشد. نمونهٔ آماده پایین کادر قرار دارد.</p>
+<div class="grid"><div class="field"><label>عنوان آزمون</label><input id="title" maxlength="180" placeholder="مثلاً آزمون فصل اول ریاضی"></div><div class="field"><label>درس</label><input id="subject" placeholder="ریاضی"></div></div>
+<div class="field"><label>توضیحات</label><input id="description" placeholder="راهنمای آزمون برای دانش‌آموز"></div>
+<div class="field"><label>سؤال‌ها (JSON)</label><textarea id="questions"></textarea></div>
+<div class="grid"><div class="field"><label>روش تصحیح تشریحی</label><select id="grading"><option value="teacher">معلم</option><option value="ai">هوش مصنوعی (نیازمند اتصال سرویس تصحیح)</option></select></div><div class="field"><label>مدت آزمون (دقیقه)</label><input id="duration" type="number" min="1" max="240" value="30"></div><div class="field"><label>حداکثر دفعات شرکت</label><input id="attempts" type="number" min="1" max="20" value="1"></div><div class="field"><label>ثبت نمرهٔ نهایی</label><select id="scorePolicy"><option value="highest">بالاترین نمره</option><option value="latest">آخرین نمره</option><option value="average">میانگین</option></select></div><div class="field"><label>شروع آزمون (اختیاری)</label><input id="starts" type="datetime-local"></div><div class="field"><label>پایان آزمون (اختیاری)</label><input id="ends" type="datetime-local"></div></div>
+<label style="display:flex;gap:8px;align-items:center;font-size:12px;margin:12px 0"><input id="publish" type="checkbox" style="width:auto"> پس از ذخیره، آزمون منتشر شود</label>
+<button id="save" class="btn">ذخیرهٔ آزمون</button><div id="createStatus" class="status"></div></section>
+<section id="studentArea" class="panel hidden"><h2>📝 آزمون‌های فعال من</h2><div id="examList" class="muted">در حال دریافت آزمون‌ها...</div></section>
+<section id="attemptArea" class="panel hidden"><div class="row"><h2 id="attemptTitle">آزمون</h2><span id="timer" class="pill"></span></div><div id="attemptQuestions"></div><button id="submitAttempt" class="btn">ثبت و ارسال پاسخ‌ها</button><div id="attemptStatus" class="status"></div></section>
+<section id="myAttempts" class="panel hidden"><h2>📚 تاریخچهٔ آزمون‌ها</h2><div id="attemptHistory" class="muted">در حال دریافت...</div></section>
+</main><script>
+(async()=>{
+const URL="https://rdsermutogewhcdsyoon.supabase.co",KEY="sb_publishable_kybJ2B3BKoT2fScPaz6xRQ_eBOSwiqi",db=supabase.createClient(URL,KEY);
+const $=id=>document.getElementById(id),say=(id,msg)=>$(id).textContent=msg;
+let session,profile,currentExam;
+const sample=[{type:"mcq",text:"حاصل ۲ + ۲ چیست؟",options:["۳","۴","۵","۶"],answer:1,points:2},{type:"written",text:"روش حل خود را توضیح بده.",points:3}];
+$("questions").value=JSON.stringify(sample,null,2);
+try{
+ const s=await db.auth.getSession();session=s.data.session;
+ if(!session){location.replace("./index.html?auth=required");return;}
+ const p=await db.from("ka_profiles").select("role,approved").eq("id",session.user.id).single();profile=p.data;
+ if(p.error||!profile||profile.approved!==true){say("notice","حساب تأییدشده پیدا نشد.");return;}
+ $("who").textContent=profile.role==="student"?"دانش‌آموز": "معلم / مدیر";
+ $("back").href=profile.role==="student"?"./student.html":"./teacher.html";
+ if(["teacher","admin","creator"].includes(profile.role)){
+  $("teacherArea").classList.remove("hidden");
+  $("studentArea").classList.add("hidden");
+  await loadTeacherExams();
+ }else if(profile.role==="student"){
+  $("studentArea").classList.remove("hidden");$("myAttempts").classList.remove("hidden");
+  await loadStudentExams();await loadHistory();
+ }else{say("notice","این نقش اجازهٔ استفاده از آزمون‌ها را ندارد.");return;}
+ say("notice","اتصال برقرار است. ✅");
+}catch(e){say("notice","خطا: "+e.message);}
+async function loadTeacherExams(){
+ const {data,error}=await db.from("ka_exams").select("id,title,subject,status,created_at").eq("created_by",session.user.id).order("created_at",{ascending:false});
+ if(error){say("createStatus","ابتدا فایل supabase-exams-setup.sql را در SQL Editor اجرا کن. "+error.message);return;}
+ const box=$("teacherArea");let list=document.getElementById("teacherExamList");
+ if(!list){list=document.createElement("div");list.id="teacherExamList";list.className="panel";box.after(list);}
+ list.innerHTML="<h2>آزمون‌های ساخته‌شده</h2>";
+ (data||[]).forEach(e=>{const d=document.createElement("div");d.className="exam";d.textContent=e.title+" · "+e.subject+" · "+e.status;list.append(d);});
+}
+$("save").addEventListener("click",async()=>{
+ const btn=$("save");btn.disabled=true;say("createStatus","در حال ذخیره...");
+ try{
+  const questions=JSON.parse($("questions").value);
+  if(!Array.isArray(questions)||!questions.length)throw new Error("حداقل یک سؤال لازم است.");
+  questions.forEach((q,i)=>{if(!q.text||!Number(q.points)||Number(q.points)<=0)throw new Error("متن و بارم سؤال "+(i+1)+" را بررسی کن.");if(q.type==="mcq"&&(!Array.isArray(q.options)||q.options.length!==4||!Number.isInteger(q.answer)||q.answer<0||q.answer>3))throw new Error("سؤال چهارگزینه‌ای "+(i+1)+" باید ۴ گزینه و شماره پاسخ درست از ۰ تا ۳ داشته باشد.");if(!["mcq","written"].includes(q.type))throw new Error("نوع سؤال "+(i+1)+" باید mcq یا written باشد.");});
+  const starts=$("starts").value?new Date($("starts").value).toISOString():null,ends=$("ends").value?new Date($("ends").value).toISOString():null;
+  if(starts&&ends&&new Date(ends)<=new Date(starts))throw new Error("زمان پایان باید بعد از شروع باشد.");
+  const row={created_by:session.user.id,title:$("title").value.trim(),subject:$("subject").value.trim(),description:$("description").value.trim(),questions,grading_mode:$("grading").value,duration_minutes:Number($("duration").value),max_attempts:Number($("attempts").value),score_policy:$("scorePolicy").value,starts_at:starts,ends_at:ends,status:$("publish").checked?"published":"draft"};
+  if(!row.title)throw new Error("عنوان آزمون را وارد کن.");
+  const {error}=await db.from("ka_exams").insert(row);if(error)throw error;
+  say("createStatus","آزمون ذخیره شد! ✅");$("title").value="";await loadTeacherExams();
+ }catch(e){say("createStatus","ذخیره ناموفق: "+e.message);}
+ finally{btn.disabled=false;}
+});
+async function loadStudentExams(){
+ const {data,error}=await db.from("ka_exams").select("id,title,subject,description,questions,duration_minutes,max_attempts,starts_at,ends_at").eq("status","published").order("created_at",{ascending:false});
+ if(error){say("examList","دریافت آزمون‌ها ناموفق بود. "+error.message);return;}
+ const box=$("examList");box.innerHTML="";
+ if(!data?.length){box.textContent="فعلاً آزمون فعالی وجود ندارد.";return;}
+ for(const e of data){const d=document.createElement("div");d.className="exam";const h=document.createElement("b");h.textContent=e.title+" · "+e.subject;const p=document.createElement("p");p.className="muted";p.textContent=e.description+" | "+e.duration_minutes+" دقیقه | حداکثر "+e.max_attempts+" بار";const b=document.createElement("button");b.className="btn";b.textContent="شروع آزمون";b.onclick=()=>startExam(e);d.append(h,p,b);box.append(d);}
+}
+async function startExam(e){
+ const {data:old}=await db.from("ka_exam_attempts").select("id,attempt_no").eq("exam_id",e.id).eq("student_id",session.user.id);
+ if((old||[]).length>=e.max_attempts){say("examList","تعداد دفعات مجاز این آزمون تمام شده است.");return;}
+ currentExam={...e,attemptNo:(old||[]).length+1};
+ $("attemptTitle").textContent=e.title;$("attemptQuestions").innerHTML="";
+ e.questions.forEach((q,i)=>{const d=document.createElement("div");d.className="q";const t=document.createElement("b");t.textContent=(i+1)+". "+q.text+" ("+q.points+" نمره)";d.append(t);if(q.type==="mcq"){q.options.forEach((op,j)=>{const l=document.createElement("label"),r=document.createElement("input");r.type="radio";r.name="q"+i;r.value=j;r.style.width="auto";l.append(r,document.createTextNode(" "+op));d.append(l);});}else{const a=document.createElement("textarea");a.id="answer"+i;a.style.direction="rtl";a.style.textAlign="right";a.placeholder="پاسخ تشریحی...";d.append(a);} $("attemptQuestions").append(d);});
+ $("attemptArea").classList.remove("hidden");$("attemptArea").scrollIntoView({behavior:"smooth"});
+}
+$("submitAttempt").addEventListener("click",async()=>{
+ if(!currentExam)return;const btn=$("submitAttempt");btn.disabled=true;
+ const answers={};currentExam.questions.forEach((q,i)=>{answers[i]=q.type==="mcq"?document.querySelector('input[name="q'+i+'"]:checked')?.value??null:$("answer"+i)?.value||"";});
+ try{const {error}=await db.from("ka_exam_attempts").insert({exam_id:currentExam.id,student_id:session.user.id,answers,attempt_no:currentExam.attemptNo});if(error)throw error;say("attemptStatus","پاسخ‌ها با موفقیت ثبت شدند. پس از تصحیح، نتیجه نمایش داده می‌شود. ✅");$("attemptArea").classList.add("hidden");await loadHistory();}catch(e){say("attemptStatus","ارسال ناموفق: "+e.message);}finally{btn.disabled=false;}
+});
+async function loadHistory(){
+ const {data,error}=await db.from("ka_exam_attempts").select("id,exam_id,attempt_no,status,score,max_score,evaluation,submitted_at,ka_exams(title)").eq("student_id",session.user.id).order("submitted_at",{ascending:false});
+ if(error){say("attemptHistory",error.message);return;}const box=$("attemptHistory");box.innerHTML="";
+ if(!data?.length){box.textContent="هنوز در آزمونی شرکت نکرده‌ای.";return;}
+ data.forEach(a=>{const d=document.createElement("div");d.className="exam";d.textContent=(a.ka_exams?.title||"آزمون")+" · تلاش "+a.attempt_no+" · "+(a.status==="graded"?(a.score+"/"+a.max_score+" · "+(a.evaluation||"")):"در انتظار تصحیح");box.append(d);});
+}
+})();
+</script></body></html>
