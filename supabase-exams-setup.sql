@@ -193,3 +193,76 @@ with check (
   )
 );
 grant select, insert, update, delete on public.ka_exam_answer_keys to authenticated;
+
+
+
+-- Automatically grade multiple-choice questions without exposing answer keys to students.
+create or replace function public.ka_exam_autograde_mcq_v1()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  exam_questions jsonb;
+  correct_answers jsonb;
+  question_item jsonb;
+  question_index integer := 0;
+  total_points numeric := 0;
+  earned_points numeric := 0;
+  has_written boolean := false;
+  selected_answer text;
+  correct_answer text;
+begin
+  select e.questions, k.answer_key
+    into exam_questions, correct_answers
+  from public.ka_exams e
+  left join public.ka_exam_answer_keys k on k.exam_id = e.id
+  where e.id = new.exam_id;
+
+  if exam_questions is null then
+    raise exception 'اطلاعات آزمون پیدا نشد.';
+  end if;
+
+  for question_item in
+    select value from jsonb_array_elements(exam_questions)
+  loop
+    total_points := total_points + coalesce((question_item->>'points')::numeric, 0);
+
+    if question_item->>'type' = 'mcq' then
+      selected_answer := new.answers->>question_index::text;
+      correct_answer := correct_answers->>question_index::text;
+
+      if selected_answer is not null
+         and correct_answer is not null
+         and selected_answer = correct_answer then
+        earned_points := earned_points + coalesce((question_item->>'points')::numeric, 0);
+      end if;
+    elsif question_item->>'type' = 'written' then
+      has_written := true;
+    end if;
+
+    question_index := question_index + 1;
+  end loop;
+
+  new.score := earned_points;
+  new.max_score := total_points;
+
+  if has_written then
+    new.status := 'submitted';
+    new.graded_at := null;
+    new.feedback := 'سؤال‌های چهارگزینه‌ای خودکار تصحیح شده‌اند؛ سؤال‌های تشریحی در انتظار بررسی معلم هستند.';
+  else
+    new.status := 'graded';
+    new.graded_at := now();
+    new.feedback := 'تصحیح خودکار سؤال‌های چهارگزینه‌ای انجام شد.';
+  end if;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists ka_exam_autograde_mcq_before_insert on public.ka_exam_attempts;
+create trigger ka_exam_autograde_mcq_before_insert
+before insert on public.ka_exam_attempts
+for each row execute function public.ka_exam_autograde_mcq_v1();
