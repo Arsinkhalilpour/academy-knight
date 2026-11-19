@@ -56,8 +56,12 @@ $("save").addEventListener("click",async()=>{
   if(starts&&ends&&new Date(ends)<=new Date(starts))throw new Error("زمان پایان باید بعد از شروع باشد.");
   const row={created_by:session.user.id,title:$("title").value.trim(),subject:$("subject").value.trim(),description:$("description").value.trim(),questions,grading_mode:$("grading").value,duration_minutes:Number($("duration").value),max_attempts:Number($("attempts").value),score_policy:$("scorePolicy").value,starts_at:starts,ends_at:ends,status:$("publish").checked?"published":"draft"};
   if(!row.title)throw new Error("عنوان آزمون را وارد کن.");
-  const {error}=await db.from("ka_exams").insert(row);if(error)throw error;
-  say("createStatus","آزمون ذخیره شد! ✅");$("title").value="";await loadTeacherExams();
+  const answerKey={};questions.forEach((q,i)=>{if(q.type==="mcq"){answerKey[i]=q.answer;delete q.answer;}});
+  row.questions=questions;
+  const {data:created,error}=await db.from("ka_exams").insert(row).select("id").single();if(error)throw error;
+  const {error:keyError}=await db.from("ka_exam_answer_keys").insert({exam_id:created.id,answer_key:answerKey});
+  if(keyError){await db.from("ka_exams").delete().eq("id",created.id);throw keyError;}
+  say("createStatus","آزمون ذخیره شد! پاسخ‌نامه به‌صورت خصوصی نگهداری می‌شود. ✅");$("title").value="";await loadTeacherExams();
  }catch(e){say("createStatus","ذخیره ناموفق: "+e.message);}
  finally{btn.disabled=false;}
 });
