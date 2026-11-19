@@ -7,7 +7,7 @@
 <section id="teacherArea" class="panel hidden"><h2>✍️ ساخت آزمون جدید</h2><p class="muted">سؤال‌ها را به قالب JSON وارد کن. هر سؤال می‌تواند چهارگزینه‌ای یا تشریحی باشد. نمونهٔ آماده پایین کادر قرار دارد.</p>
 <div class="grid"><div class="field"><label>عنوان آزمون</label><input id="title" maxlength="180" placeholder="مثلاً آزمون فصل اول ریاضی"></div><div class="field"><label>درس</label><input id="subject" placeholder="ریاضی"></div></div>
 <div class="field"><label>توضیحات</label><input id="description" placeholder="راهنمای آزمون برای دانش‌آموز"></div>
-<div class="field"><label>سؤال‌ها (JSON)</label><textarea id="questions"></textarea></div>
+<div class="field"><label>سؤال‌ها (JSON)</label><textarea id="questions"></textarea></div><div class="field"><label>📎 فایل‌های ضمیمهٔ آزمون</label><input id="examFiles" type="file" multiple accept=".doc,.docx,.xls,.xlsx,.ppt,.pptx,.pdf,.txt,.csv,.jpg,.jpeg,.png"><div class="muted">حداکثر ۵ فایل، هرکدام تا ۱۵ مگابایت.</div></div>
 <div class="grid"><div class="field"><label>روش تصحیح تشریحی</label><select id="grading"><option value="teacher">معلم</option><option value="ai">هوش مصنوعی (نیازمند اتصال سرویس تصحیح)</option></select></div><div class="field"><label>مدت آزمون (دقیقه)</label><input id="duration" type="number" min="1" max="240" value="30"></div><div class="field"><label>حداکثر دفعات شرکت</label><input id="attempts" type="number" min="1" max="20" value="1"></div><div class="field"><label>ثبت نمرهٔ نهایی</label><select id="scorePolicy"><option value="highest">بالاترین نمره</option><option value="latest">آخرین نمره</option><option value="average">میانگین</option></select></div><div class="field"><label>تاریخ شروع آزمون (شمسی، اختیاری)</label><input id="startsDate" type="text" inputmode="numeric" placeholder="۱۴۰۵/۰۸/۲۸"></div><div class="field"><label>ساعت شروع آزمون</label><input id="startsTime" type="time" value="08:00"></div><div class="field"><label>تاریخ پایان / مهلت شرکت (شمسی، اختیاری)</label><input id="endsDate" type="text" inputmode="numeric" placeholder="۱۴۰۵/۰۸/۲۹"></div><div class="field"><label>ساعت پایان / مهلت شرکت</label><input id="endsTime" type="time" value="23:59"></div></div>
 <label style="display:flex;gap:8px;align-items:center;font-size:12px;margin:12px 0"><input id="publish" type="checkbox" style="width:auto"> پس از ذخیره، آزمون منتشر شود</label>
 <button id="save" class="btn">ذخیرهٔ آزمون</button><div id="createStatus" class="status"></div></section>
@@ -16,7 +16,7 @@
 <section id="myAttempts" class="panel hidden"><h2>📚 تاریخچهٔ آزمون‌ها</h2><div id="attemptHistory" class="muted">در حال دریافت...</div></section>
 </main><script>
 (async()=>{
-const URL="https://rdsermutogewhcdsyoon.supabase.co",KEY="sb_publishable_kybJ2B3BKoT2fScPaz6xRQ_eBOSwiqi",db=supabase.createClient(URL,KEY);
+const URL="https://rdsermutogewhcdsyoon.supabase.co",KEY="sb_publishable_kybJ2B3BKoT2fScPaz6xRQ_eBOSwiqi",db=supabase.createClient(URL,KEY),FILE_BUCKET="ka-exam-files";
 const $=id=>document.getElementById(id),say=(id,msg)=>$(id).textContent=msg;
 let session,profile,currentExam,examTimer=null,examDeadline=0,submittingAttempt=false;
 const sample=[{type:"mcq",text:"حاصل ۲ + ۲ چیست؟",options:["۳","۴","۵","۶"],answer:1,points:2},{type:"written",text:"روش حل خود را توضیح بده.",points:3}];
@@ -53,17 +53,17 @@ try{
  say("notice","اتصال برقرار است. ✅");
 }catch(e){say("notice","خطا: "+e.message);}
 async function loadTeacherExams(){
- const {data,error}=await db.from("ka_exams").select("id,title,subject,status,created_at").eq("created_by",session.user.id).order("created_at",{ascending:false});
+ const {data,error}=await db.from("ka_exams").select("id,title,subject,status,attachments,created_at").eq("created_by",session.user.id).order("created_at",{ascending:false});
  if(error){say("createStatus","ابتدا فایل supabase-exams-setup.sql را در SQL Editor اجرا کن. "+error.message);return;}
  const box=$("teacherArea");let list=document.getElementById("teacherExamList");
  if(!list){list=document.createElement("div");list.id="teacherExamList";list.className="panel";box.after(list);}
  list.innerHTML="<h2>آزمون‌های ساخته‌شده</h2>";
- (data||[]).forEach(e=>{const d=document.createElement("div");d.className="exam";const info=document.createElement("div");info.textContent=e.title+" · "+e.subject+" · "+e.status;const del=document.createElement("button");del.className="btn secondary";del.style.marginTop="10px";del.textContent="🗑️ حذف آزمون";del.addEventListener("click",async()=>{if(!confirm("آیا مطمئنی می‌خواهی این آزمون را برای همیشه حذف کنی؟ همهٔ پاسخ‌ها و سوابق شرکت در این آزمون نیز حذف می‌شوند."))return;del.disabled=true;del.textContent="در حال حذف...";const {error}=await db.from("ka_exams").delete().eq("id",e.id).eq("created_by",session.user.id);if(error){alert("حذف انجام نشد: "+error.message);del.disabled=false;del.textContent="🗑️ حذف آزمون";return;}await loadTeacherExams();});d.append(info,del);list.append(d);});
+ (data||[]).forEach(e=>{const d=document.createElement("div");d.className="exam";const info=document.createElement("div");info.textContent=e.title+" · "+e.subject+" · "+e.status+((e.attachments||[]).length?" · "+e.attachments.length+" فایل ضمیمه":"");const del=document.createElement("button");del.className="btn secondary";del.style.marginTop="10px";del.textContent="🗑️ حذف آزمون";del.addEventListener("click",async()=>{if(!confirm("آیا مطمئنی می‌خواهی این آزمون را برای همیشه حذف کنی؟ همهٔ پاسخ‌ها و سوابق شرکت در این آزمون نیز حذف می‌شوند."))return;del.disabled=true;del.textContent="در حال حذف...";if(e.attachments?.length){await db.storage.from(FILE_BUCKET).remove(e.attachments.map(f=>f.path));}const {error}=await db.from("ka_exams").delete().eq("id",e.id).eq("created_by",session.user.id);if(error){alert("حذف انجام نشد: "+error.message);del.disabled=false;del.textContent="🗑️ حذف آزمون";return;}await loadTeacherExams();});d.append(info,del);list.append(d);});
 }
 $("save").addEventListener("click",async()=>{
  const btn=$("save");btn.disabled=true;say("createStatus","در حال ذخیره...");
  try{
-  const questions=JSON.parse($("questions").value);
+  const questions=JSON.parse($("questions").value);const files=Array.from($("examFiles").files||[]);if(files.length>5)throw new Error("حداکثر ۵ فایل مجاز است.");for(const f of files){if(f.size>15*1024*1024)throw new Error("حجم فایل بیش از ۱۵ مگابایت است: "+f.name);}
   if(!Array.isArray(questions)||!questions.length)throw new Error("حداقل یک سؤال لازم است.");
   questions.forEach((q,i)=>{if(!q.text||!Number(q.points)||Number(q.points)<=0)throw new Error("متن و بارم سؤال "+(i+1)+" را بررسی کن.");if(q.type==="mcq"&&(!Array.isArray(q.options)||q.options.length!==4||!Number.isInteger(q.answer)||q.answer<0||q.answer>3))throw new Error("سؤال چهارگزینه‌ای "+(i+1)+" باید ۴ گزینه و شماره پاسخ درست از ۰ تا ۳ داشته باشد.");if(!["mcq","written"].includes(q.type))throw new Error("نوع سؤال "+(i+1)+" باید mcq یا written باشد.");});
   const starts=jalaliToIso($("startsDate").value,$("startsTime").value),ends=jalaliToIso($("endsDate").value,$("endsTime").value);
@@ -76,16 +76,33 @@ $("save").addEventListener("click",async()=>{
   const {data:created,error}=await db.from("ka_exams").insert(row).select("id").single();if(error)throw error;
   const {error:keyError}=await db.from("ka_exam_answer_keys").insert({exam_id:created.id,answer_key:answerKey});
   if(keyError){await db.from("ka_exams").delete().eq("id",created.id);throw keyError;}
-  say("createStatus","آزمون ذخیره شد! پاسخ‌نامه به‌صورت خصوصی نگهداری می‌شود. ✅");$("title").value="";await loadTeacherExams();
+  const attachments=[];
+  try{
+   for(const f of files){
+    const safeName=f.name.split("/").join("_").split("\\").join("_");
+    const path=created.id+"/"+crypto.randomUUID()+"-"+safeName;
+    const {error:uploadError}=await db.storage.from(FILE_BUCKET).upload(path,f,{upsert:false});
+    if(uploadError)throw uploadError;
+    attachments.push({name:f.name,path,size:f.size});
+   }
+   if(attachments.length){const {error:updateError}=await db.from("ka_exams").update({attachments}).eq("id",created.id);if(updateError)throw updateError;}
+  }catch(fileError){
+   if(attachments.length)await db.storage.from(FILE_BUCKET).remove(attachments.map(x=>x.path));
+   await db.from("ka_exams").delete().eq("id",created.id);
+   throw new Error("آپلود فایل ناموفق بود: "+fileError.message);
+  }
+  say("createStatus","آزمون و "+attachments.length+" فایل ضمیمه ذخیره شد. ✅");$("title").value="";$("examFiles").value="";await loadTeacherExams();
  }catch(e){say("createStatus","ذخیره ناموفق: "+e.message);}
  finally{btn.disabled=false;}
 });
 async function loadStudentExams(){
- const {data,error}=await db.from("ka_exams").select("id,title,subject,description,questions,duration_minutes,max_attempts,starts_at,ends_at").eq("status","published").order("created_at",{ascending:false});
+ const {data,error}=await db.from("ka_exams").select("id,title,subject,description,questions,attachments,duration_minutes,max_attempts,starts_at,ends_at").eq("status","published").order("created_at",{ascending:false});
  if(error){say("examList","دریافت آزمون‌ها ناموفق بود. "+error.message);return;}
  const box=$("examList");box.innerHTML="";
  if(!data?.length){box.textContent="فعلاً آزمون فعالی وجود ندارد.";return;}
- for(const e of data){const d=document.createElement("div");d.className="exam";const h=document.createElement("b");h.textContent=e.title+" · "+e.subject;const p=document.createElement("p");p.className="muted";p.textContent=e.description+" | "+e.duration_minutes+" دقیقه | حداکثر "+e.max_attempts+" بار";const b=document.createElement("button");b.className="btn";const now=Date.now(),start=e.starts_at?new Date(e.starts_at).getTime():0,end=e.ends_at?new Date(e.ends_at).getTime():Infinity;let availability="";if(start&&now<start){b.disabled=true;b.textContent="هنوز شروع نشده";availability="شروع: "+new Intl.DateTimeFormat("fa-IR-u-ca-persian",{dateStyle:"short",timeStyle:"short",timeZone:"Asia/Tehran"}).format(new Date(start));}else if(now>end){b.disabled=true;b.textContent="مهلت آزمون تمام شده";availability="مهلت شرکت به پایان رسیده است.";}else{b.textContent="شروع آزمون";}if(availability){const time=document.createElement("div");time.className="muted";time.textContent=availability;p.append(document.createElement("br"),time);}b.onclick=()=>startExam(e);d.append(h,p,b);box.append(d);}
+ for(const e of data){const d=document.createElement("div");d.className="exam";const h=document.createElement("b");h.textContent=e.title+" · "+e.subject;const p=document.createElement("p");p.className="muted";p.textContent=e.description+" | "+e.duration_minutes+" دقیقه | حداکثر "+e.max_attempts+" بار";const b=document.createElement("button");b.className="btn";const now=Date.now(),start=e.starts_at?new Date(e.starts_at).getTime():0,end=e.ends_at?new Date(e.ends_at).getTime():Infinity;let availability="";if(start&&now<start){b.disabled=true;b.textContent="هنوز شروع نشده";availability="شروع: "+new Intl.DateTimeFormat("fa-IR-u-ca-persian",{dateStyle:"short",timeStyle:"short",timeZone:"Asia/Tehran"}).format(new Date(start));}else if(now>end){b.disabled=true;b.textContent="مهلت آزمون تمام شده";availability="مهلت شرکت به پایان رسیده است.";}else{b.textContent="شروع آزمون";}if(availability){const time=document.createElement("div");time.className="muted";time.textContent=availability;p.append(document.createElement("br"),time);}b.onclick=()=>startExam(e);d.append(h,p);
+ if(e.attachments?.length){const filesBox=document.createElement("div");filesBox.className="muted";filesBox.textContent="📎 فایل‌های آزمون:";for(const f of e.attachments){const link=document.createElement("a");link.textContent="⬇️ "+f.name;link.href="#";link.style.display="block";link.style.color="var(--gold)";link.onclick=async ev=>{ev.preventDefault();link.textContent="در حال آماده‌سازی دانلود...";const {data,error}=await db.storage.from(FILE_BUCKET).createSignedUrl(f.path,3600);if(error){link.textContent="خطا در دریافت فایل";return;}const a=document.createElement("a");a.href=data.signedUrl;a.download=f.name;a.target="_blank";a.click();link.textContent="⬇️ "+f.name;};filesBox.append(link);}d.append(filesBox);}
+ d.append(b);box.append(d);}
 }
 async function startExam(e){
  const now=Date.now(),start=e.starts_at?new Date(e.starts_at).getTime():0,end=e.ends_at?new Date(e.ends_at).getTime():Infinity;
