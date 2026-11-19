@@ -116,3 +116,51 @@ with check (
 
 grant select, insert, update, delete on public.ka_exams to authenticated;
 grant select, insert, update on public.ka_exam_attempts to authenticated;
+
+
+-- Enforce attempt limits and exam window on the database, not only in the browser.
+create or replace function public.ka_exam_validate_attempt_v1()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  exam_row public.ka_exams%rowtype;
+  used_count integer;
+begin
+  select * into exam_row
+  from public.ka_exams
+  where id = new.exam_id
+  for update;
+
+  if not found or exam_row.status <> 'published' then
+    raise exception 'این آزمون در دسترس نیست.';
+  end if;
+  if exam_row.starts_at is not null and exam_row.starts_at > now() then
+    raise exception 'زمان شروع آزمون هنوز نرسیده است.';
+  end if;
+  if exam_row.ends_at is not null and exam_row.ends_at < now() then
+    raise exception 'مهلت شرکت در آزمون پایان یافته است.';
+  end if;
+  if cardinality(exam_row.assignment_user_ids) > 0
+     and not (new.student_id = any(exam_row.assignment_user_ids)) then
+    raise exception 'این آزمون برای حساب شما اختصاص داده نشده است.';
+  end if;
+
+  select count(*) into used_count
+  from public.ka_exam_attempts
+  where exam_id = new.exam_id and student_id = new.student_id;
+
+  if used_count >= exam_row.max_attempts then
+    raise exception 'تعداد دفعات مجاز شرکت در این آزمون تمام شده است.';
+  end if;
+  new.attempt_no := used_count + 1;
+  return new;
+end;
+$$;
+
+drop trigger if exists ka_exam_validate_attempt_before_insert on public.ka_exam_attempts;
+create trigger ka_exam_validate_attempt_before_insert
+before insert on public.ka_exam_attempts
+for each row execute function public.ka_exam_validate_attempt_v1();
